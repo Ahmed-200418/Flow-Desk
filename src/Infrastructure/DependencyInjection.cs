@@ -23,7 +23,7 @@ public static class DependencyInjection
         services.AddScoped<AuditableEntityInterceptor>();
 
         var connectionString = configuration.GetConnectionString("DefaultConnection")
-            ?? "Server=localhost,1433;Database=FlowDeskDb;User Id=sa;Password=FlowDesk_StrongP@ssw0rd!2026;TrustServerCertificate=True;";
+            ?? "Server=localhost\\SQLEXPRESS;Database=FlowDeskDb;Trusted_Connection=True;TrustServerCertificate=True;";
 
         services.AddDbContext<FlowDeskDbContext>((sp, options) =>
         {
@@ -35,6 +35,8 @@ public static class DependencyInjection
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<IDateTimeProvider, DateTimeProvider>();
+        services.AddScoped<IRequestNumberGenerator, RequestNumberGenerator>();
+        services.AddScoped<IAttachmentStorageService, AttachmentStorageService>();
         services.AddScoped<DatabaseSeeder>();
 
         services.AddAuthentication(defaultScheme: JwtBearerDefaults.AuthenticationScheme)
