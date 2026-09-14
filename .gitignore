@@ -1,0 +1,25 @@
+# .NET / C#
+bin/
+obj/
+out/
+.vs/
+.vscode/
+.idea/
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build & Test output
+[Tt]est[R]esult*/
+[Cc]overage*/
+
+# Secrets & Environment
+appsettings.Production.json
+appsettings.Development.local.json
+.env
+*.pem
+*.pfx
+
+# OS files
+.DS_Store
+Thumbs.db

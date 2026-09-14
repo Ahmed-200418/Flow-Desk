@@ -1,0 +1,6 @@
+@FlowDesk.API_HostAddress = http://localhost:5067
+
+GET {{FlowDesk.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

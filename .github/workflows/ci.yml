@@ -1,0 +1,37 @@
+name: FlowDesk CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          ACCEPT_EULA: "Y"
+          MSSQL_SA_PASSWORD: "FlowDesk_StrongP@ssw0rd!2026"
+        ports:
+          - 1433:1433
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Restore dependencies
+      run: dotnet restore FlowDesk.slnx
+
+    - name: Build solution
+      run: dotnet build FlowDesk.slnx --no-restore --configuration Release
+
+    - name: Run Architecture & Unit Tests
+      run: dotnet test FlowDesk.slnx --no-build --configuration Release --verbosity normal

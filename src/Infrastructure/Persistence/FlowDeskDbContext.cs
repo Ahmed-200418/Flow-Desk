@@ -1,0 +1,61 @@
+using System.Reflection;
+using FlowDesk.Application.Common.Interfaces;
+using FlowDesk.Domain.Entities;
+using FlowDesk.Infrastructure.Persistence.Interceptors;
+using Microsoft.EntityFrameworkCore;
+
+namespace FlowDesk.Infrastructure.Persistence;
+
+public class FlowDeskDbContext : DbContext, IApplicationDbContext
+{
+    private readonly AuditableEntityInterceptor _auditableEntityInterceptor;
+
+    public FlowDeskDbContext(
+        DbContextOptions<FlowDeskDbContext> options,
+        AuditableEntityInterceptor auditableEntityInterceptor)
+        : base(options)
+    {
+        _auditableEntityInterceptor = auditableEntityInterceptor;
+    }
+
+    public DbSet<User> Users => Set<User>();
+    public DbSet<Role> Roles => Set<Role>();
+    public DbSet<Permission> Permissions => Set<Permission>();
+    public DbSet<UserRole> UserRoles => Set<UserRole>();
+    public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+
+    public DbSet<Organization> Organizations => Set<Organization>();
+    public DbSet<Department> Departments => Set<Department>();
+    public DbSet<Position> Positions => Set<Position>();
+
+    public DbSet<RequestType> RequestTypes => Set<RequestType>();
+    public DbSet<Request> Requests => Set<Request>();
+    public DbSet<RequestItem> RequestItems => Set<RequestItem>();
+    public DbSet<Comment> Comments => Set<Comment>();
+    public DbSet<Attachment> Attachments => Set<Attachment>();
+
+    public DbSet<Workflow> Workflows => Set<Workflow>();
+    public DbSet<WorkflowVersion> WorkflowVersions => Set<WorkflowVersion>();
+    public DbSet<WorkflowStep> WorkflowSteps => Set<WorkflowStep>();
+    public DbSet<WorkflowCondition> WorkflowConditions => Set<WorkflowCondition>();
+
+    public DbSet<ApprovalInstance> ApprovalInstances => Set<ApprovalInstance>();
+    public DbSet<ApprovalAction> ApprovalActions => Set<ApprovalAction>();
+
+    public DbSet<Delegation> Delegations => Set<Delegation>();
+    public DbSet<Notification> Notifications => Set<Notification>();
+    public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+        modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+    }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        base.OnConfiguring(optionsBuilder);
+        optionsBuilder.AddInterceptors(_auditableEntityInterceptor);
+    }
+}
