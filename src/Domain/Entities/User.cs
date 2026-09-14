@@ -9,7 +9,13 @@ public class User : AuditableEntity
     public string FirstName { get; private set; } = default!;
     public string LastName { get; private set; } = default!;
     public string? JobTitle { get; private set; }
+    
     public Guid? DepartmentId { get; private set; }
+    public Department? Department { get; private set; }
+
+    public Guid? PositionId { get; private set; }
+    public Position? Position { get; private set; }
+
     public bool IsActive { get; private set; } = true;
     public DateTime? LockoutEndUtc { get; private set; }
     public int AccessFailedCount { get; private set; }
@@ -21,7 +27,14 @@ public class User : AuditableEntity
 
     private User() { }
 
-    public User(string email, string passwordHash, string firstName, string lastName, string? jobTitle = null, Guid? departmentId = null)
+    public User(
+        string email,
+        string passwordHash,
+        string firstName,
+        string lastName,
+        string? jobTitle = null,
+        Guid? departmentId = null,
+        Guid? positionId = null)
     {
         Email = email.Trim().ToLowerInvariant();
         PasswordHash = passwordHash;
@@ -29,6 +42,7 @@ public class User : AuditableEntity
         LastName = lastName.Trim();
         JobTitle = jobTitle?.Trim();
         DepartmentId = departmentId;
+        PositionId = positionId;
         IsActive = true;
         AccessFailedCount = 0;
     }
@@ -40,12 +54,13 @@ public class User : AuditableEntity
         LockoutEndUtc = null;
     }
 
-    public void UpdateProfile(string firstName, string lastName, string? jobTitle, Guid? departmentId)
+    public void UpdateProfile(string firstName, string lastName, string? jobTitle, Guid? departmentId, Guid? positionId)
     {
         FirstName = firstName.Trim();
         LastName = lastName.Trim();
         JobTitle = jobTitle?.Trim();
         DepartmentId = departmentId;
+        PositionId = positionId;
     }
 
     public void RecordFailedLogin(int maxFailedAccessAttempts = 5, int lockoutMinutes = 15)

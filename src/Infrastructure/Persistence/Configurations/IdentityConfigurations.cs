@@ -34,6 +34,16 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .HasMaxLength(150);
 
         builder.Ignore(u => u.FullName);
+
+        builder.HasOne(u => u.Department)
+            .WithMany(d => d.Users)
+            .HasForeignKey(u => u.DepartmentId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(u => u.Position)
+            .WithMany()
+            .HasForeignKey(u => u.PositionId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }
 
