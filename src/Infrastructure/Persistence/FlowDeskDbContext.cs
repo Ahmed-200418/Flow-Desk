@@ -11,7 +11,7 @@ public class FlowDeskDbContext : DbContext, IApplicationDbContext
     private readonly AuditableEntityInterceptor _auditableEntityInterceptor;
 
     public FlowDeskDbContext(
-        DbContextOptions<FlowDeskDbContext> options,
+        DbContextOptions options,
         AuditableEntityInterceptor auditableEntityInterceptor)
         : base(options)
     {
@@ -51,6 +51,17 @@ public class FlowDeskDbContext : DbContext, IApplicationDbContext
     {
         base.OnModelCreating(modelBuilder);
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+
+        if (Database.IsSqlServer())
+        {
+            modelBuilder.Entity<Request>().Property(r => r.RowVersion).IsRowVersion();
+            modelBuilder.Entity<ApprovalInstance>().Property(ai => ai.RowVersion).IsRowVersion();
+        }
+        else
+        {
+            modelBuilder.Entity<Request>().Property(r => r.RowVersion).IsConcurrencyToken(false).ValueGeneratedNever();
+            modelBuilder.Entity<ApprovalInstance>().Property(ai => ai.RowVersion).IsConcurrencyToken(false).ValueGeneratedNever();
+        }
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

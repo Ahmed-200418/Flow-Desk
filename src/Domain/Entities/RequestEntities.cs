@@ -60,6 +60,8 @@ public class Request : AuditableEntity
     public DateTime? SubmittedAtUtc { get; private set; }
     public DateTime? CompletedAtUtc { get; private set; }
 
+    public byte[] RowVersion { get; set; } = Guid.NewGuid().ToByteArray();
+
     public ICollection<RequestItem> Items { get; private set; } = new List<RequestItem>();
     public ICollection<Comment> Comments { get; private set; } = new List<Comment>();
     public ICollection<Attachment> Attachments { get; private set; } = new List<Attachment>();
@@ -90,6 +92,7 @@ public class Request : AuditableEntity
         Priority = priority;
         DepartmentId = departmentId;
         Status = RequestStatus.Draft;
+        RowVersion = Guid.NewGuid().ToByteArray();
     }
 
     public void Submit(Guid workflowVersionId)

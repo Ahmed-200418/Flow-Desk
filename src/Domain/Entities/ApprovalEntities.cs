@@ -25,6 +25,8 @@ public class ApprovalInstance : AuditableEntity
     public DateTime DueAtUtc { get; private set; }
     public DateTime? RespondedAtUtc { get; private set; }
 
+    public byte[] RowVersion { get; set; } = Guid.NewGuid().ToByteArray();
+
     public ICollection<ApprovalAction> Actions { get; private set; } = new List<ApprovalAction>();
 
     private ApprovalInstance() { }
@@ -45,9 +47,10 @@ public class ApprovalInstance : AuditableEntity
         Status = ApprovalStatus.Pending;
         AssignedAtUtc = DateTime.UtcNow;
         DueAtUtc = DateTime.UtcNow.AddHours(timeoutHours);
+        RowVersion = Guid.NewGuid().ToByteArray();
     }
 
-    public void RecordDecision(ApprovalDecision decision, Guid actorUserId, string? comment = null)
+    public ApprovalAction RecordDecision(ApprovalDecision decision, Guid actorUserId, string? comment = null)
     {
         if (Status != ApprovalStatus.Pending)
         {
@@ -65,7 +68,9 @@ public class ApprovalInstance : AuditableEntity
 
         RespondedAtUtc = DateTime.UtcNow;
 
-        Actions.Add(new ApprovalAction(Id, actorUserId, decision, comment));
+        var action = new ApprovalAction(Id, actorUserId, decision, comment);
+        Actions.Add(action);
+        return action;
     }
 
     public void Delegate(Guid newAssignedUserId, Guid actorUserId, string reason)

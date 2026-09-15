@@ -90,6 +90,7 @@ public class RequestConfiguration : IEntityTypeConfiguration<Request>
         builder.Property(r => r.Description).HasMaxLength(4000).IsRequired();
         builder.Property(r => r.TotalAmount).HasPrecision(18, 4);
         builder.Property(r => r.Currency).HasMaxLength(10).IsRequired();
+        builder.Property(r => r.RowVersion);
 
         builder.HasIndex(r => r.Status);
         builder.HasIndex(r => r.RequesterUserId);
@@ -258,6 +259,7 @@ public class ApprovalInstanceConfiguration : IEntityTypeConfiguration<ApprovalIn
     {
         builder.ToTable("ApprovalInstances");
         builder.HasKey(ai => ai.Id);
+        builder.Property(ai => ai.RowVersion);
         builder.HasIndex(ai => ai.Status);
         builder.HasIndex(ai => ai.AssignedUserId);
 
@@ -289,6 +291,7 @@ public class ApprovalActionConfiguration : IEntityTypeConfiguration<ApprovalActi
     {
         builder.ToTable("ApprovalActions");
         builder.HasKey(aa => aa.Id);
+        builder.Property(aa => aa.Id).ValueGeneratedOnAdd();
         builder.Property(aa => aa.Comment).HasMaxLength(1000);
 
         builder.HasOne(aa => aa.ApprovalInstance)

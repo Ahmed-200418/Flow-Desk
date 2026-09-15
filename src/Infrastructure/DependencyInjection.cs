@@ -37,6 +37,7 @@ public static class DependencyInjection
         services.AddScoped<IDateTimeProvider, DateTimeProvider>();
         services.AddScoped<IRequestNumberGenerator, RequestNumberGenerator>();
         services.AddScoped<IAttachmentStorageService, AttachmentStorageService>();
+        services.AddSingleton<IIdempotencyService, InMemoryIdempotencyService>();
         services.AddScoped<DatabaseSeeder>();
 
         services.AddAuthentication(defaultScheme: JwtBearerDefaults.AuthenticationScheme)
