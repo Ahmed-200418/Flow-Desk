@@ -1,0 +1,216 @@
+@model FlowDesk.Application.Features.Reports.AdminDashboardReportDto
+@using FlowDesk.Application.Features.Reports
+@{
+    var employeeReport = ViewData["EmployeeReport"] as EmployeeDashboardReportDto;
+    var managerReport = ViewData["ManagerReport"] as ManagerDashboardReportDto;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold text-dark mb-1"><i class="bi bi-pie-chart text-primary me-2"></i> Executive Reporting & Analytics</h3>
+        <p class="text-muted mb-0">System-wide performance indicators, SLA compliance, department throughput, and bottleneck diagnostics.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-action="Export"
+           asp-route-fromDate="@ViewData["FromDate"]"
+           asp-route-toDate="@ViewData["ToDate"]"
+           asp-route-departmentId="@ViewData["DepartmentId"]"
+           class="btn btn-outline-success">
+            <i class="bi bi-file-earmark-spreadsheet me-1"></i> Export Analytics CSV
+        </a>
+    </div>
+</div>
+
+<!-- Executive Summary Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-2-4 col-md-3">
+        <div class="card card-custom h-100 p-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="text-muted small fw-semibold">TOTAL REQUESTS</div>
+                    <div class="fs-3 fw-bold text-dark">@Model.TotalRequests.ToString("N0")</div>
+                    <small class="text-muted">All-time platform volume</small>
+                </div>
+                <div class="bg-primary-subtle text-primary p-3 rounded-3">
+                    <i class="bi bi-file-earmark-bar-graph fs-4"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-custom h-100 p-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="text-muted small fw-semibold">PENDING APPROVALS</div>
+                    <div class="fs-3 fw-bold text-warning">@Model.PendingRequests.ToString("N0")</div>
+                    <small class="text-muted">Active in approval pipelines</small>
+                </div>
+                <div class="bg-warning-subtle text-warning p-3 rounded-3">
+                    <i class="bi bi-hourglass-split fs-4"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-custom h-100 p-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="text-muted small fw-semibold">AVG APPROVAL TIME</div>
+                    <div class="fs-3 fw-bold text-info">@Model.AverageApprovalTimeHours.ToString("F1")h</div>
+                    <small class="text-muted">Submission to completion</small>
+                </div>
+                <div class="bg-info-subtle text-info p-3 rounded-3">
+                    <i class="bi bi-stopwatch fs-4"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-custom h-100 p-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="text-muted small fw-semibold">SLA COMPLIANCE</div>
+                    <div class="fs-3 fw-bold text-success">@Model.SlaCompliancePercentage.ToString("F1")%</div>
+                    <small class="text-muted">Completed within 48h limit</small>
+                </div>
+                <div class="bg-success-subtle text-success p-3 rounded-3">
+                    <i class="bi bi-shield-check fs-4"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Personal Quick Overview Widgets -->
+<div class="row g-4 mb-4">
+    @if (employeeReport != null)
+    {
+        <div class="col-lg-6">
+            <div class="card card-custom h-100">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-person-workspace me-2"></i> Employee Dashboard (My Requests)</span>
+                    <a asp-controller="Requests" asp-action="Index" class="btn btn-sm btn-link">View All</a>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center g-2 mb-3">
+                        <div class="col"><div class="p-2 border rounded bg-light"><div class="fs-5 fw-bold text-dark">@employeeReport.TotalMyRequests</div><small class="text-muted">Total</small></div></div>
+                        <div class="col"><div class="p-2 border rounded bg-warning-subtle"><div class="fs-5 fw-bold text-warning">@employeeReport.PendingCount</div><small class="text-muted">Pending</small></div></div>
+                        <div class="col"><div class="p-2 border rounded bg-success-subtle"><div class="fs-5 fw-bold text-success">@employeeReport.ApprovedCount</div><small class="text-muted">Approved</small></div></div>
+                        <div class="col"><div class="p-2 border rounded bg-danger-subtle"><div class="fs-5 fw-bold text-danger">@employeeReport.RejectedCount</div><small class="text-muted">Rejected</small></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (managerReport != null)
+    {
+        <div class="col-lg-6">
+            <div class="card card-custom h-100">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-briefcase me-2"></i> Manager Dashboard (Pending Approvals)</span>
+                    <a asp-controller="Approvals" asp-action="Inbox" class="btn btn-sm btn-link">Approval Inbox</a>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center g-2 mb-3">
+                        <div class="col"><div class="p-2 border rounded bg-warning-subtle"><div class="fs-5 fw-bold text-warning">@managerReport.PendingApprovalsCount</div><small class="text-muted">Assigned</small></div></div>
+                        <div class="col"><div class="p-2 border rounded bg-success-subtle"><div class="fs-5 fw-bold text-success">@managerReport.ApprovedTodayCount</div><small class="text-muted">Approved Today</small></div></div>
+                        <div class="col"><div class="p-2 border rounded bg-danger-subtle"><div class="fs-5 fw-bold text-danger">@managerReport.RejectedTodayCount</div><small class="text-muted">Rejected Today</small></div></div>
+                        <div class="col"><div class="p-2 border rounded bg-danger text-white"><div class="fs-5 fw-bold">@managerReport.OverdueApprovalsCount</div><small class="text-white-50">Overdue SLA</small></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Department Performance Analytics -->
+<div class="card card-custom mb-4">
+    <div class="card-header bg-light">
+        <i class="bi bi-building me-2"></i> Department Performance & Throughput
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Department</th>
+                        <th>Total Volume</th>
+                        <th>Approved</th>
+                        <th>Rejected</th>
+                        <th>Avg Processing Time</th>
+                        <th>Approval Ratio</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var dept in Model.DepartmentAnalytics)
+                    {
+                        var ratio = dept.TotalRequests > 0 ? Math.Round((double)dept.ApprovedRequests / dept.TotalRequests * 100.0, 1) : 0.0;
+                        <tr>
+                            <td class="fw-bold"><i class="bi bi-diagram-3 me-2 text-primary"></i>@dept.DepartmentName</td>
+                            <td>@dept.TotalRequests</td>
+                            <td><span class="badge bg-success">@dept.ApprovedRequests</span></td>
+                            <td><span class="badge bg-danger">@dept.RejectedRequests</span></td>
+                            <td><span class="font-monospace">@dept.AverageApprovalTimeHours.ToString("F1") hrs</span></td>
+                            <td style="width: 200px;">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="progress flex-grow-1" style="height: 8px;">
+                                        <div class="progress-bar bg-success" style="width: @ratio%"></div>
+                                    </div>
+                                    <small class="fw-bold">@ratio%</small>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Workflow Bottleneck Diagnostics -->
+<div class="card card-custom">
+    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-exclamation-triangle me-2 text-warning"></i> Workflow Bottleneck Diagnostics</span>
+        <small class="text-muted">Steps with longest average waiting times</small>
+    </div>
+    <div class="card-body p-0">
+        @if (!Model.WorkflowBottlenecks.Any())
+        {
+            <div class="text-center py-4 text-muted">
+                <i class="bi bi-check-circle-fill fs-3 text-success"></i>
+                <p class="mt-2 mb-0">No approval bottlenecks detected across active workflows.</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Step Name</th>
+                            <th>Workflow Context</th>
+                            <th>Pending In Step</th>
+                            <th>Avg Waiting Time</th>
+                            <th>Severity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var b in Model.WorkflowBottlenecks)
+                        {
+                            var severityBadge = b.AverageWaitTimeHours > 48 ? "bg-danger" : (b.AverageWaitTimeHours > 24 ? "bg-warning text-dark" : "bg-info text-dark");
+                            var severityText = b.AverageWaitTimeHours > 48 ? "High Bottleneck (>48h)" : (b.AverageWaitTimeHours > 24 ? "Medium Delay (>24h)" : "Normal Progress");
+                            <tr>
+                                <td class="fw-bold">@b.StepName</td>
+                                <td>@b.WorkflowName</td>
+                                <td><span class="badge bg-secondary">@b.TotalPendingInStep requests</span></td>
+                                <td><span class="font-monospace text-dark fw-semibold">@b.AverageWaitTimeHours.ToString("F1") hours</span></td>
+                                <td><span class="badge @severityBadge">@severityText</span></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

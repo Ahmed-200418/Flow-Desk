@@ -46,6 +46,22 @@ public static class DependencyInjection
         services.AddScoped<IAuditService, AuditService>();
         services.AddScoped<DatabaseSeeder>();
 
+        // Phase 9: Caching & Redis Configuration
+        var redisConn = configuration.GetConnectionString("Redis");
+        if (!string.IsNullOrWhiteSpace(redisConn))
+        {
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = redisConn;
+                options.InstanceName = "FlowDesk_";
+            });
+        }
+        else
+        {
+            services.AddDistributedMemoryCache();
+        }
+        services.AddSingleton<ICacheService, RedisCacheService>();
+
         // Phase 7: Notifications & Background Processing Services
         services.AddTransient<IEmailSender, SmtpEmailSender>();
         services.AddScoped<INotificationService, NotificationService>();

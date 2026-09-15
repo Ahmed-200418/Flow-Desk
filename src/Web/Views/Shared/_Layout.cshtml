@@ -163,6 +163,9 @@
             <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Notifications" ? "active" : "")" asp-controller="Notifications" asp-action="Index">
                 <i class="bi bi-bell"></i> Notifications
             </a>
+            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Reports" ? "active" : "")" asp-controller="Reports" asp-action="Dashboard">
+                <i class="bi bi-pie-chart"></i> Reports & Analytics
+            </a>
             <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Delegations" ? "active" : "")" asp-controller="Delegations" asp-action="Index">
                 <i class="bi bi-person-gear"></i> Delegations
             </a>
@@ -179,6 +182,9 @@
             </a>
 
             <div class="nav-section-title">Administration</div>
+            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Performance" ? "active" : "")" asp-controller="Performance" asp-action="Index">
+                <i class="bi bi-lightning-charge"></i> Redis & Performance
+            </a>
             <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "AuditLogs" ? "active" : "")" asp-controller="AuditLogs" asp-action="Index">
                 <i class="bi bi-shield-check"></i> Audit & Compliance
             </a>

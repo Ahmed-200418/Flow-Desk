@@ -62,6 +62,17 @@ public class FlowDeskDbContext : DbContext, IApplicationDbContext
             modelBuilder.Entity<Request>().Ignore(r => r.RowVersion);
             modelBuilder.Entity<ApprovalInstance>().Ignore(ai => ai.RowVersion);
         }
+
+        // Performance & Query Optimization Indexes
+        modelBuilder.Entity<Request>().HasIndex(r => new { r.Status, r.RequesterUserId });
+        modelBuilder.Entity<Request>().HasIndex(r => new { r.DepartmentId, r.CreatedAtUtc });
+        modelBuilder.Entity<Request>().HasIndex(r => new { r.RequestTypeId, r.Status });
+        modelBuilder.Entity<ApprovalInstance>().HasIndex(a => new { a.AssignedUserId, a.Status });
+        modelBuilder.Entity<ApprovalInstance>().HasIndex(a => new { a.RequestId, a.StepNumber });
+        modelBuilder.Entity<Workflow>().HasIndex(w => new { w.RequestTypeId, w.IsActive });
+        modelBuilder.Entity<AuditLog>().HasIndex(a => new { a.EntityName, a.EntityId });
+        modelBuilder.Entity<AuditLog>().HasIndex(a => a.TimestampUtc);
+        modelBuilder.Entity<Notification>().HasIndex(n => new { n.RecipientUserId, n.IsRead });
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
