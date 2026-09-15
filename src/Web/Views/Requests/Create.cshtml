@@ -1,0 +1,138 @@
+@{
+    ViewData["Title"] = "Create Request";
+    var orgId = (Guid)(ViewBag.OrganizationId ?? Guid.Empty);
+    var requestTypes = ViewBag.RequestTypes as List<FlowDesk.Application.Features.RequestTypes.RequestTypeDto> ?? new List<FlowDesk.Application.Features.RequestTypes.RequestTypeDto>();
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-9">
+        <div class="card card-custom">
+            <div class="card-header">
+                <i class="bi bi-file-earmark-plus me-2 text-primary"></i> Create Business Request
+            </div>
+            <div class="card-body">
+                <form asp-action="Create" method="post" id="requestForm">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="organizationId" value="@orgId" />
+
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-danger p-2 small">
+                            @Html.ValidationSummary(true)
+                        </div>
+                    }
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Request Type</label>
+                            <select name="requestTypeId" class="form-select" required>
+                                <option value="">-- Select Type --</option>
+                                @foreach (var rt in requestTypes)
+                                {
+                                    <option value="@rt.Id">@rt.Name (@rt.Code)</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Priority</label>
+                            <select name="priority" class="form-select">
+                                <option value="Low">Low</option>
+                                <option value="Medium" selected>Medium</option>
+                                <option value="High">High</option>
+                                <option value="Urgent">Urgent</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Currency</label>
+                            <input type="text" name="currency" value="EGP" class="form-control" required />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Request Title</label>
+                        <input type="text" name="title" class="form-control" placeholder="e.g. Purchase of 5 Workstations" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Description & Justification</label>
+                        <textarea name="description" class="form-control" rows="4" placeholder="Provide detailed business justification..." required></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Estimated Total Amount</label>
+                        <input type="number" step="0.01" id="totalAmountInput" name="totalAmount" value="0.00" class="form-control" required />
+                    </div>
+
+                    <hr />
+
+                    <!-- Dynamic Line Items -->
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="fw-bold m-0"><i class="bi bi-list-check me-1 text-primary"></i> Request Line Items</h6>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="addItemRow()"><i class="bi bi-plus-lg me-1"></i> Add Item</button>
+                    </div>
+
+                    <div class="table-responsive mb-4">
+                        <table class="table table-bordered align-middle" id="itemsTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Item Name / Description</th>
+                                    <th style="width: 120px;">Qty</th>
+                                    <th style="width: 160px;">Unit Price</th>
+                                    <th style="width: 50px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><input type="text" name="itemNames[]" class="form-control" placeholder="Item description..." /></td>
+                                    <td><input type="number" name="itemQuantities[]" value="1" min="1" class="form-control item-qty" onchange="calculateTotal()" /></td>
+                                    <td><input type="number" step="0.01" name="itemPrices[]" value="0.00" class="form-control item-price" onchange="calculateTotal()" /></td>
+                                    <td><button type="button" class="btn btn-sm btn-danger" onclick="removeItemRow(this)"><i class="bi bi-trash"></i></button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a asp-action="Index" class="btn btn-light border">Cancel</a>
+                        <button type="submit" class="btn btn-primary py-2 px-4"><i class="bi bi-save me-1"></i> Create Request Draft</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    function addItemRow() {
+        const tbody = document.querySelector("#itemsTable tbody");
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td><input type="text" name="itemNames[]" class="form-control" placeholder="Item description..." /></td>
+            <td><input type="number" name="itemQuantities[]" value="1" min="1" class="form-control item-qty" onchange="calculateTotal()" /></td>
+            <td><input type="number" step="0.01" name="itemPrices[]" value="0.00" class="form-control item-price" onchange="calculateTotal()" /></td>
+            <td><button type="button" class="btn btn-sm btn-danger" onclick="removeItemRow(this)"><i class="bi bi-trash"></i></button></td>
+        `;
+        tbody.appendChild(tr);
+    }
+
+    function removeItemRow(btn) {
+        const row = btn.closest("tr");
+        if (document.querySelectorAll("#itemsTable tbody tr").length > 1) {
+            row.remove();
+            calculateTotal();
+        }
+    }
+
+    function calculateTotal() {
+        let total = 0;
+        const rows = document.querySelectorAll("#itemsTable tbody tr");
+        rows.forEach(r => {
+            const qty = parseFloat(r.querySelector(".item-qty").value) || 0;
+            const price = parseFloat(r.querySelector(".item-price").value) || 0;
+            total += (qty * price);
+        });
+        document.getElementById("totalAmountInput").value = total.toFixed(2);
+    }
+</script>
+}

@@ -1,0 +1,187 @@
+@model FlowDesk.Application.Features.Requests.RequestDetailDto
+@{
+    ViewData["Title"] = $"Request #{Model.RequestNumber}";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h4 class="fw-bold m-0">Request #@Model.RequestNumber</h4>
+        <small class="text-muted">Type: @Model.RequestTypeName &bull; Created @Model.CreatedAtUtc.ToString("yyyy-MM-dd HH:mm")</small>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-action="Index" class="btn btn-light border"><i class="bi bi-arrow-left me-1"></i> Back</a>
+        
+        @if (Model.Status == RequestStatus.Draft || Model.Status == RequestStatus.Returned)
+        {
+            <form asp-action="Submit" asp-route-id="@Model.Id" method="post" class="d-inline">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-success fw-semibold"><i class="bi bi-send me-1"></i> Submit Request</button>
+            </form>
+        }
+        
+        @if (Model.Status == RequestStatus.Draft || Model.Status == RequestStatus.PendingApproval)
+        {
+            <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#cancelModal"><i class="bi bi-x-circle me-1"></i> Cancel</button>
+        }
+    </div>
+</div>
+
+<div class="row">
+    <!-- Left Column: Details & Items -->
+    <div class="col-md-8">
+        <div class="card card-custom mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-info-circle text-primary me-2"></i> Overview & Summary</span>
+                <span class="badge badge-status bg-@Model.Status.ToString().ToLower()">@Model.Status</span>
+            </div>
+            <div class="card-body">
+                <h5 class="fw-bold text-dark mb-2">@Model.Title</h5>
+                <p class="text-secondary bg-light p-3 rounded" style="white-space: pre-line;">@Model.Description</p>
+
+                <div class="row text-muted small my-3">
+                    <div class="col-md-4">
+                        <strong class="text-dark d-block">Requester:</strong> @Model.RequesterName
+                    </div>
+                    <div class="col-md-4">
+                        <strong class="text-dark d-block">Department:</strong> @(Model.DepartmentName ?? "-")
+                    </div>
+                    <div class="col-md-4">
+                        <strong class="text-dark d-block">Priority:</strong>
+                        <span class="badge bg-@(Model.Priority == RequestPriority.High || Model.Priority == RequestPriority.Urgent ? "danger" : "secondary")">@Model.Priority</span>
+                    </div>
+                </div>
+
+                <div class="p-3 bg-primary bg-opacity-10 border border-primary border-opacity-25 rounded d-flex justify-content-between align-items-center">
+                    <span class="fw-bold text-primary">Total Request Value:</span>
+                    <span class="fs-4 fw-bold text-primary">@Model.TotalAmount.ToString("N2") @Model.Currency</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Items Table -->
+        <div class="card card-custom mb-4">
+            <div class="card-header">
+                <i class="bi bi-list-ul text-primary me-2"></i> Request Line Items
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Item Description</th>
+                                <th>Quantity</th>
+                                <th>Unit Price</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.Items.Any())
+                            {
+                                foreach (var item in Model.Items)
+                                {
+                                    <tr>
+                                        <td class="fw-semibold">@item.ItemName</td>
+                                        <td>@item.Quantity</td>
+                                        <td>@item.UnitPrice.ToString("N2") @Model.Currency</td>
+                                        <td class="fw-bold">@item.TotalPrice.ToString("N2") @Model.Currency</td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="4" class="text-center py-3 text-muted">No line items specified.</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comments Thread -->
+        <div class="card card-custom mb-4">
+            <div class="card-header">
+                <i class="bi bi-chat-left-text text-primary me-2"></i> Comments & History
+            </div>
+            <div class="card-body">
+                @if (Model.Comments.Any())
+                {
+                    <div class="vstack gap-3 mb-4">
+                        @foreach (var c in Model.Comments.OrderBy(c => c.CreatedAtUtc))
+                        {
+                            <div class="p-3 border rounded bg-light">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <strong class="text-dark">@c.AuthorName</strong>
+                                    <small class="text-muted">@c.CreatedAtUtc.ToString("yyyy-MM-dd HH:mm")</small>
+                                </div>
+                                <p class="m-0 text-secondary">@c.Content</p>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted small mb-3">No comments posted yet.</p>
+                }
+
+                <form asp-action="AddComment" asp-route-id="@Model.Id" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="mb-2">
+                        <textarea name="content" class="form-control" rows="2" placeholder="Write a comment or note..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-sm btn-primary"><i class="bi bi-chat-right-text me-1"></i> Post Comment</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Status Summary -->
+    <div class="col-md-4">
+        <div class="card card-custom mb-4">
+            <div class="card-header">
+                <i class="bi bi-clock-history text-primary me-2"></i> Workflow Information
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <small class="text-muted d-block">Current Step:</small>
+                    <span class="fw-bold fs-5">Step @Model.CurrentStepNumber</span>
+                </div>
+                <div class="mb-3">
+                    <small class="text-muted d-block">Submitted At:</small>
+                    <span class="fw-semibold">@(Model.SubmittedAtUtc?.ToString("yyyy-MM-dd HH:mm") ?? "Not Submitted")</span>
+                </div>
+                <div>
+                    <small class="text-muted d-block">Completed At:</small>
+                    <span class="fw-semibold">@(Model.CompletedAtUtc?.ToString("yyyy-MM-dd HH:mm") ?? "-")</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cancel Request Modal -->
+<div class="modal fade" id="cancelModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="Cancel" asp-route-id="@Model.Id" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold text-danger">Cancel Request</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted">Are you sure you want to cancel this request? This action cannot be undone.</p>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Cancellation Reason</label>
+                        <textarea name="reason" class="form-control" rows="3" required placeholder="State reason for cancellation..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-danger">Confirm Cancellation</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

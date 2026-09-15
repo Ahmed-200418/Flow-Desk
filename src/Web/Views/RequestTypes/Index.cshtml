@@ -1,0 +1,60 @@
+@model List<FlowDesk.Application.Features.RequestTypes.RequestTypeDto>
+@{
+    ViewData["Title"] = "Request Types Management";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h4 class="fw-bold m-0">Request Types</h4>
+        <small class="text-muted">Configure business request categories (Purchase, Expense, Leave, IT Access, etc.)</small>
+    </div>
+    <a asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i> Add Request Type</a>
+</div>
+
+<div class="card card-custom">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Icon</th>
+                        <th>Code</th>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td><i class="bi bi-@(item.Icon ?? "tag") fs-5 text-primary"></i></td>
+                                <td><span class="badge bg-secondary">@item.Code</span></td>
+                                <td class="fw-semibold">@item.Name</td>
+                                <td>@item.Description</td>
+                                <td>
+                                    @if (item.IsActive)
+                                    {
+                                        <span class="badge bg-success">Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Inactive</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center py-4 text-muted">No request types configured yet.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

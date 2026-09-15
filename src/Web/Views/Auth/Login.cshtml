@@ -1,0 +1,59 @@
+@{
+    ViewData["Title"] = "Sign In";
+    Layout = "_Layout";
+}
+
+<div class="row justify-content-center align-items-center py-5">
+    <div class="col-md-5 col-lg-4">
+        <div class="card card-custom shadow-lg">
+            <div class="card-body p-4">
+                <div class="text-center mb-4">
+                    <div class="d-inline-flex align-items-center justify-content-center bg-primary text-white rounded-circle p-3 mb-2">
+                        <i class="bi bi-diagram-3-fill fs-2"></i>
+                    </div>
+                    <h4 class="fw-bold">FlowDesk Enterprise</h4>
+                    <p class="text-muted small">Sign in to your account</p>
+                </div>
+
+                <form asp-controller="Auth" asp-action="Login" asp-route-returnUrl="@ViewData["ReturnUrl"]" method="post">
+                    @Html.AntiForgeryToken()
+
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-danger p-2 small">
+                            @Html.ValidationSummary(true)
+                        </div>
+                    }
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Email Address</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="bi bi-envelope"></i></span>
+                            <input type="email" name="email" class="form-control" placeholder="admin@flowdesk.local" required autofocus />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="bi bi-lock"></i></span>
+                            <input type="password" name="password" class="form-control" placeholder="••••••••" required />
+                        </div>
+                    </div>
+
+                    <div class="form-check mb-4">
+                        <input type="checkbox" name="rememberMe" value="true" class="form-check-input" id="rememberMe" />
+                        <label class="form-check-label text-muted small" for="rememberMe">Remember me on this device</label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">
+                        <i class="bi bi-box-arrow-in-right me-2"></i> Sign In
+                    </button>
+                </form>
+            </div>
+            <div class="card-footer bg-light text-center py-3">
+                <small class="text-muted">Default Super Admin: <code>admin@flowdesk.local</code> / <code>Admin123!</code></small>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,75 @@
+@model FlowDesk.Application.Common.Models.PaginatedList<FlowDesk.Application.Features.Workflows.WorkflowDto>
+@{
+    ViewData["Title"] = "Workflow Definitions";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h4 class="fw-bold m-0">Workflow Engine Definitions</h4>
+        <small class="text-muted">Configure versioned approval workflows, steps, and conditions</small>
+    </div>
+    <a asp-action="Create" class="btn btn-primary"><i class="bi bi-diagram-3-fill me-1"></i> Create Workflow</a>
+</div>
+
+<div class="card card-custom">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Code</th>
+                        <th>Workflow Name</th>
+                        <th>Active Version</th>
+                        <th>Total Versions</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Items.Any())
+                    {
+                        foreach (var wf in Model.Items)
+                        {
+                            <tr>
+                                <td><span class="badge bg-dark">@wf.Code</span></td>
+                                <td class="fw-semibold">@wf.Name</td>
+                                <td>
+                                    @if (wf.ActiveVersion != null)
+                                    {
+                                        <span class="badge bg-success">v@wf.ActiveVersion.VersionNumber (Published)</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning text-dark">No Active Version</span>
+                                    }
+                                </td>
+                                <td>@wf.Versions.Count version(s)</td>
+                                <td>
+                                    @if (wf.IsActive)
+                                    {
+                                        <span class="badge bg-primary">Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Inactive</span>
+                                    }
+                                </td>
+                                <td>@wf.CreatedAtUtc.ToString("yyyy-MM-dd")</td>
+                                <td>
+                                    <a asp-action="Builder" asp-route-id="@wf.Id" class="btn btn-sm btn-outline-primary py-0"><i class="bi bi-sliders me-1"></i> Workflow Builder</a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-muted">No workflows configured.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

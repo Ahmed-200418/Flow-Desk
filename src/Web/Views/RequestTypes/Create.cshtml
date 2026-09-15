@@ -1,0 +1,61 @@
+@{
+    ViewData["Title"] = "Create Request Type";
+    var orgs = ViewBag.Organizations as List<FlowDesk.Application.Features.Organizations.OrganizationDto> ?? new List<FlowDesk.Application.Features.Organizations.OrganizationDto>();
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card card-custom">
+            <div class="card-header">
+                <i class="bi bi-tag me-2 text-primary"></i> Create Request Type
+            </div>
+            <div class="card-body">
+                <form asp-action="Create" method="post">
+                    @Html.AntiForgeryToken()
+
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-danger p-2 small">
+                            @Html.ValidationSummary(true)
+                        </div>
+                    }
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Organization</label>
+                        <select name="organizationId" class="form-select" required>
+                            @foreach (var o in orgs)
+                            {
+                                <option value="@o.Id">@o.Name (@o.Code)</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Request Type Name</label>
+                        <input type="text" name="name" class="form-control" placeholder="e.g. Purchase Request" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Request Type Code</label>
+                        <input type="text" name="code" class="form-control" placeholder="e.g. PURCHASE" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Description</label>
+                        <textarea name="description" class="form-control" rows="3" placeholder="Describe the purpose of this request type..." required></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Icon (Bootstrap Icon name)</label>
+                        <input type="text" name="icon" class="form-control" placeholder="cart3, file-text, bag, etc." />
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a asp-action="Index" class="btn btn-light border">Cancel</a>
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i> Save Request Type</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
