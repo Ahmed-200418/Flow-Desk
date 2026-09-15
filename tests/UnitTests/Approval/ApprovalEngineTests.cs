@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Moq;
 using Xunit;
 using OrganizationEntity = FlowDesk.Domain.Entities.Organization;
+using WorkflowEntity = FlowDesk.Domain.Entities.Workflow;
 
 namespace FlowDesk.UnitTests.ApprovalTests;
 
@@ -48,7 +49,7 @@ public class ApprovalEngineTests : IDisposable
         _currentUserServiceMock.Setup(x => x.UserId).Returns(user.Id);
 
         var request = new Request("REQ-2026-00001", reqType.Id, user.Id, org.Id, "Title", "Desc");
-        var workflow = new Workflow(org.Id, reqType.Id, "Purchase Flow", "PUR-FLOW", "Workflow");
+        var workflow = new WorkflowEntity(org.Id, reqType.Id, "Purchase Flow", "PUR-FLOW", "Workflow");
         var version = new WorkflowVersion(workflow.Id, 1);
         _context.Workflows.Add(workflow);
         _context.WorkflowVersions.Add(version);
@@ -92,7 +93,7 @@ public class ApprovalEngineTests : IDisposable
         _currentUserServiceMock.Setup(x => x.UserId).Returns(user.Id);
 
         var request = new Request("REQ-2026-00002", reqType.Id, user.Id, org.Id, "Title", "Desc");
-        var workflow = new Workflow(org.Id, reqType.Id, "Purchase Flow", "PUR-FLOW2", "Workflow");
+        var workflow = new WorkflowEntity(org.Id, reqType.Id, "Purchase Flow", "PUR-FLOW2", "Workflow");
         var version = new WorkflowVersion(workflow.Id, 1);
         _context.Workflows.Add(workflow);
         _context.WorkflowVersions.Add(version);

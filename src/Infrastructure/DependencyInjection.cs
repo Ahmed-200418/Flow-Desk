@@ -38,6 +38,8 @@ public static class DependencyInjection
         services.AddScoped<IRequestNumberGenerator, RequestNumberGenerator>();
         services.AddScoped<IAttachmentStorageService, AttachmentStorageService>();
         services.AddSingleton<IIdempotencyService, InMemoryIdempotencyService>();
+        services.AddScoped<IWorkflowEvaluator, WorkflowEvaluator>();
+        services.AddScoped<IApproverResolver, ApproverResolver>();
         services.AddScoped<DatabaseSeeder>();
 
         services.AddAuthentication(defaultScheme: JwtBearerDefaults.AuthenticationScheme)

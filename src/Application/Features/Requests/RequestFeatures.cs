@@ -251,10 +251,17 @@ public record SubmitRequestCommand(Guid RequestId) : IRequest<RequestDetailDto>;
 public class SubmitRequestCommandHandler : IRequestHandler<SubmitRequestCommand, RequestDetailDto>
 {
     private readonly IApplicationDbContext _context;
+    private readonly IWorkflowEvaluator _workflowEvaluator;
+    private readonly IApproverResolver _approverResolver;
 
-    public SubmitRequestCommandHandler(IApplicationDbContext context)
+    public SubmitRequestCommandHandler(
+        IApplicationDbContext context,
+        IWorkflowEvaluator workflowEvaluator,
+        IApproverResolver approverResolver)
     {
         _context = context;
+        _workflowEvaluator = workflowEvaluator;
+        _approverResolver = approverResolver;
     }
 
     public async Task<RequestDetailDto> Handle(SubmitRequestCommand request, CancellationToken cancellationToken)
@@ -263,13 +270,38 @@ public class SubmitRequestCommandHandler : IRequestHandler<SubmitRequestCommand,
         if (req == null) throw new NotFoundException(nameof(Request), request.RequestId);
 
         var activeWorkflowVersion = await _context.WorkflowVersions
+            .Include(wv => wv.Steps)
+                .ThenInclude(s => s.Conditions)
             .Where(wv => wv.Workflow.RequestTypeId == req.RequestTypeId && wv.Status == WorkflowVersionStatus.Published)
             .OrderByDescending(wv => wv.VersionNumber)
-            .Select(wv => wv.Id)
             .FirstOrDefaultAsync(cancellationToken);
 
-        var targetWorkflowVersionId = activeWorkflowVersion != Guid.Empty ? activeWorkflowVersion : Guid.NewGuid();
+        Guid targetWorkflowVersionId = activeWorkflowVersion?.Id ?? Guid.NewGuid();
         req.Submit(targetWorkflowVersionId);
+
+        if (activeWorkflowVersion != null && activeWorkflowVersion.Steps.Count > 0)
+        {
+            var matchingSteps = activeWorkflowVersion.Steps
+                .OrderBy(s => s.StepNumber)
+                .Where(s => _workflowEvaluator.EvaluateStepConditions(s.Conditions, req))
+                .ToList();
+
+            var firstStep = matchingSteps.FirstOrDefault();
+            if (firstStep != null)
+            {
+                var (assignedUserId, assignedRoleId) = await _approverResolver.ResolveApproverAsync(firstStep, req, cancellationToken);
+
+                var instance = new ApprovalInstance(
+                    req.Id,
+                    firstStep.Id,
+                    firstStep.StepNumber,
+                    assignedUserId,
+                    assignedRoleId,
+                    firstStep.TimeoutHours);
+
+                _context.ApprovalInstances.Add(instance);
+            }
+        }
 
         await _context.SaveChangesAsync(cancellationToken);
         return await CreateRequestCommandHandler.GetRequestDetailByIdAsync(req.Id, _context, cancellationToken);

@@ -72,15 +72,21 @@ public class ApproveRequestCommandHandler : IRequestHandler<ApproveRequestComman
     private readonly IApplicationDbContext _context;
     private readonly ICurrentUserService _currentUserService;
     private readonly IIdempotencyService _idempotencyService;
+    private readonly IWorkflowEvaluator? _workflowEvaluator;
+    private readonly IApproverResolver? _approverResolver;
 
     public ApproveRequestCommandHandler(
         IApplicationDbContext context,
         ICurrentUserService currentUserService,
-        IIdempotencyService idempotencyService)
+        IIdempotencyService idempotencyService,
+        IWorkflowEvaluator? workflowEvaluator = null,
+        IApproverResolver? approverResolver = null)
     {
         _context = context;
         _currentUserService = currentUserService;
         _idempotencyService = idempotencyService;
+        _workflowEvaluator = workflowEvaluator;
+        _approverResolver = approverResolver;
     }
 
     public async Task Handle(ApproveRequestCommand request, CancellationToken cancellationToken)
@@ -106,23 +112,45 @@ public class ApproveRequestCommandHandler : IRequestHandler<ApproveRequestComman
 
         var req = instance.Request;
 
-        // Check if there are further workflow steps
-        var nextStep = await _context.WorkflowSteps
-            .Where(ws => ws.WorkflowVersionId == req.WorkflowVersionId && ws.StepNumber == instance.StepNumber + 1)
-            .FirstOrDefaultAsync(cancellationToken);
+        // Fetch remaining workflow steps for this version
+        var remainingSteps = await _context.WorkflowSteps
+            .Include(ws => ws.Conditions)
+            .Where(ws => ws.WorkflowVersionId == req.WorkflowVersionId && ws.StepNumber > instance.StepNumber)
+            .OrderBy(ws => ws.StepNumber)
+            .ToListAsync(cancellationToken);
+
+        WorkflowStep? nextStep = null;
+        if (_workflowEvaluator != null)
+        {
+            nextStep = remainingSteps.FirstOrDefault(s => _workflowEvaluator.EvaluateStepConditions(s.Conditions, req));
+        }
+        else
+        {
+            nextStep = remainingSteps.FirstOrDefault();
+        }
 
         if (nextStep != null)
         {
             // Advance to next step
             req.AdvanceToStep(nextStep.StepNumber);
 
+            Guid? assignedUserId = nextStep.ApproverType == ApproverType.User ? nextStep.ApproverTargetId : null;
+            Guid? assignedRoleId = nextStep.ApproverType == ApproverType.Role ? nextStep.ApproverTargetId : null;
+
+            if (_approverResolver != null)
+            {
+                var resolved = await _approverResolver.ResolveApproverAsync(nextStep, req, cancellationToken);
+                if (resolved.AssignedUserId.HasValue) assignedUserId = resolved.AssignedUserId;
+                if (resolved.AssignedRoleId.HasValue) assignedRoleId = resolved.AssignedRoleId;
+            }
+
             // Create ApprovalInstance for next step
             var nextInstance = new ApprovalInstance(
                 req.Id,
                 nextStep.Id,
                 nextStep.StepNumber,
-                nextStep.ApproverType == ApproverType.User ? nextStep.ApproverTargetId : null,
-                nextStep.ApproverType == ApproverType.Role ? nextStep.ApproverTargetId : null,
+                assignedUserId,
+                assignedRoleId,
                 nextStep.TimeoutHours);
 
             _context.ApprovalInstances.Add(nextInstance);
