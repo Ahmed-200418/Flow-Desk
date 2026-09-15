@@ -32,6 +32,19 @@ public static class Permissions
         public const string Read = "AuditLogs.Read";
     }
 
+    public static class Delegation
+    {
+        public const string Manage = "Delegation.Manage";
+        public const string Read = "Delegation.Read";
+        public const string Create = "Delegation.Create";
+    }
+
+    public static class Sla
+    {
+        public const string Manage = "Sla.Manage";
+        public const string Read = "Sla.Read";
+    }
+
     public static readonly IReadOnlyCollection<string> All = new[]
     {
         Purchase.Create,
@@ -43,6 +56,11 @@ public static class Permissions
         Workflow.Publish,
         Users.Manage,
         Reports.Read,
-        AuditLogs.Read
+        AuditLogs.Read,
+        Delegation.Manage,
+        Delegation.Read,
+        Delegation.Create,
+        Sla.Manage,
+        Sla.Read
     };
 }

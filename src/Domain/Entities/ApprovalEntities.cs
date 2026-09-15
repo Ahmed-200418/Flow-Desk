@@ -50,6 +50,12 @@ public class ApprovalInstance : AuditableEntity
         RowVersion = Guid.NewGuid().ToByteArray();
     }
 
+    public void SetDates(DateTime assignedAtUtc, DateTime dueAtUtc)
+    {
+        AssignedAtUtc = assignedAtUtc;
+        DueAtUtc = dueAtUtc;
+    }
+
     public ApprovalAction RecordDecision(ApprovalDecision decision, Guid actorUserId, string? comment = null)
     {
         if (Status != ApprovalStatus.Pending)
@@ -73,12 +79,14 @@ public class ApprovalInstance : AuditableEntity
         return action;
     }
 
-    public void Delegate(Guid newAssignedUserId, Guid actorUserId, string reason)
+    public ApprovalAction Delegate(Guid newAssignedUserId, Guid actorUserId, string reason)
     {
         Status = ApprovalStatus.Delegated;
         RespondedAtUtc = DateTime.UtcNow;
 
-        Actions.Add(new ApprovalAction(Id, actorUserId, ApprovalDecision.Delegated, $"Delegated to user '{newAssignedUserId}': {reason}"));
+        var action = new ApprovalAction(Id, actorUserId, ApprovalDecision.Delegated, $"Delegated to user '{newAssignedUserId}': {reason}");
+        Actions.Add(action);
+        return action;
     }
 
     public void MarkExpired()

@@ -59,8 +59,8 @@ public class FlowDeskDbContext : DbContext, IApplicationDbContext
         }
         else
         {
-            modelBuilder.Entity<Request>().Property(r => r.RowVersion).IsConcurrencyToken(false).ValueGeneratedNever();
-            modelBuilder.Entity<ApprovalInstance>().Property(ai => ai.RowVersion).IsConcurrencyToken(false).ValueGeneratedNever();
+            modelBuilder.Entity<Request>().Ignore(r => r.RowVersion);
+            modelBuilder.Entity<ApprovalInstance>().Ignore(ai => ai.RowVersion);
         }
     }
 

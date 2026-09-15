@@ -160,6 +160,9 @@
             <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Approvals" ? "active" : "")" asp-controller="Approvals" asp-action="Inbox">
                 <i class="bi bi-check2-square"></i> Pending Approvals
             </a>
+            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Delegations" ? "active" : "")" asp-controller="Delegations" asp-action="Index">
+                <i class="bi bi-person-gear"></i> Delegations
+            </a>
 
             <div class="nav-section-title">Workflow Engine</div>
             <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Workflows" ? "active" : "")" asp-controller="Workflows" asp-action="Index">
@@ -167,6 +170,9 @@
             </a>
             <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "RequestTypes" ? "active" : "")" asp-controller="RequestTypes" asp-action="Index">
                 <i class="bi bi-tags"></i> Request Types
+            </a>
+            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Sla" ? "active" : "")" asp-controller="Sla" asp-action="Dashboard">
+                <i class="bi bi-clock-history"></i> SLA & Escalation
             </a>
 
             <div class="nav-section-title">Administration</div>

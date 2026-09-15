@@ -52,6 +52,11 @@ public class Department : AuditableEntity
         ParentDepartmentId = parentDepartmentId;
         ManagerUserId = managerUserId;
     }
+
+    public void SetManager(Guid? managerUserId)
+    {
+        ManagerUserId = managerUserId;
+    }
 }
 
 public class Position : AuditableEntity

@@ -65,7 +65,7 @@ public class CreateRequestTypeCommandHandler : IRequestHandler<CreateRequestType
 }
 
 // Get Request Types Query
-public record GetRequestTypesQuery(Guid OrganizationId) : IRequest<List<RequestTypeDto>>;
+public record GetRequestTypesQuery(Guid? OrganizationId = null) : IRequest<List<RequestTypeDto>>;
 
 public class GetRequestTypesQueryHandler : IRequestHandler<GetRequestTypesQuery, List<RequestTypeDto>>
 {
@@ -78,9 +78,13 @@ public class GetRequestTypesQueryHandler : IRequestHandler<GetRequestTypesQuery,
 
     public async Task<List<RequestTypeDto>> Handle(GetRequestTypesQuery request, CancellationToken cancellationToken)
     {
-        return await _context.RequestTypes
-            .AsNoTracking()
-            .Where(rt => rt.OrganizationId == request.OrganizationId && rt.IsActive)
+        var query = _context.RequestTypes.AsNoTracking().Where(rt => rt.IsActive);
+        if (request.OrganizationId.HasValue)
+        {
+            query = query.Where(rt => rt.OrganizationId == request.OrganizationId.Value);
+        }
+
+        return await query
             .OrderBy(rt => rt.Name)
             .Select(rt => new RequestTypeDto(rt.Id, rt.OrganizationId, rt.Name, rt.Code, rt.Description, rt.Icon, rt.IsActive, rt.CreatedAtUtc))
             .ToListAsync(cancellationToken);

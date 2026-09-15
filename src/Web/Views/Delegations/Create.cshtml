@@ -1,0 +1,68 @@
+@using FlowDesk.Application.Features.Users
+@using FlowDesk.Application.Features.RequestTypes
+
+@{
+    var users = ViewBag.Users as IEnumerable<UserSummaryDto> ?? new List<UserSummaryDto>();
+    var requestTypes = ViewBag.RequestTypes as IEnumerable<RequestTypeDto> ?? new List<RequestTypeDto>();
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card card-custom">
+            <div class="card-header bg-white d-flex align-items-center justify-content-between">
+                <h5 class="m-0 fw-bold"><i class="bi bi-person-plus text-primary me-2"></i> Create Approval Delegation</h5>
+                <a asp-action="Index" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i> Back</a>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="Create" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Delegatee (User to receive approval authority) <span class="text-danger">*</span></label>
+                        <select name="delegateeUserId" class="form-select" required>
+                            <option value="">-- Select User --</option>
+                            @foreach (var u in users)
+                            {
+                                <option value="@u.Id">@u.FullName (@u.Email)</option>
+                            }
+                        </select>
+                        <div class="form-text">Selected user will receive pending approvals assigned to you during the delegation period.</div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Start Date & Time (UTC) <span class="text-danger">*</span></label>
+                            <input type="datetime-local" name="startDateUtc" class="form-control" value="@DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm")" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">End Date & Time (UTC) <span class="text-danger">*</span></label>
+                            <input type="datetime-local" name="endDateUtc" class="form-control" value="@DateTime.UtcNow.AddDays(7).ToString("yyyy-MM-ddTHH:mm")" required />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Request Type Scope (Optional)</label>
+                        <select name="requestTypeId" class="form-select">
+                            <option value="">-- All Request Types --</option>
+                            @foreach (var rt in requestTypes)
+                            {
+                                <option value="@rt.Id">@rt.Name (@rt.Code)</option>
+                            }
+                        </select>
+                        <div class="form-text">Leave blank to delegate approvals across ALL request types.</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Delegation Reason <span class="text-danger">*</span></label>
+                        <textarea name="reason" class="form-control" rows="3" placeholder="e.g. Annual Leave, Business Trip, Medical Leave" required></textarea>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a asp-action="Index" class="btn btn-light border">Cancel</a>
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i> Save Delegation</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

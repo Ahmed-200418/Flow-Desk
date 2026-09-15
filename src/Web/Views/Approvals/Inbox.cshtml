@@ -1,12 +1,13 @@
 @model FlowDesk.Application.Common.Models.PaginatedList<FlowDesk.Application.Features.Approvals.PendingApprovalSummaryDto>
+@using FlowDesk.Domain.Enums
 @{
     ViewData["Title"] = "Pending Approvals Inbox";
 }
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <div>
-        <h4 class="fw-bold m-0">Pending Approvals</h4>
-        <small class="text-muted">Requests assigned to you or your role awaiting decision</small>
+        <h4 class="fw-bold m-0"><i class="bi bi-inbox text-primary me-2"></i> Pending Approvals Inbox</h4>
+        <small class="text-muted">Requests assigned to you, your role, or delegated to you awaiting decision</small>
     </div>
     <span class="badge bg-warning text-dark fs-6 px-3 py-2"><i class="bi bi-clock-history me-1"></i> @Model.TotalCount Pending</span>
 </div>
@@ -24,7 +25,8 @@
                         <th>Priority</th>
                         <th>Total Amount</th>
                         <th>Step</th>
-                        <th>Assigned</th>
+                        <th>SLA Status</th>
+                        <th>Delegation</th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -43,7 +45,36 @@
                                 </td>
                                 <td class="fw-bold">@item.TotalAmount.ToString("N2") @item.Currency</td>
                                 <td><span class="badge bg-info text-white">Step @item.StepNumber</span></td>
-                                <td>@item.AssignedAtUtc.ToString("yyyy-MM-dd HH:mm")</td>
+                                <td>
+                                    @if (item.SlaStatus == "Escalated")
+                                    {
+                                        <span class="badge text-white" style="background-color: #6f42c1;"><i class="bi bi-graph-up-arrow me-1"></i> Escalated</span>
+                                    }
+                                    else if (item.SlaStatus == "Overdue")
+                                    {
+                                        <span class="badge bg-danger"><i class="bi bi-exclamation-triangle me-1"></i> Overdue</span>
+                                    }
+                                    else if (item.SlaStatus == "Reminder")
+                                    {
+                                        <span class="badge bg-warning text-dark"><i class="bi bi-bell me-1"></i> Reminder</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success"><i class="bi bi-shield-check me-1"></i> On Time</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.IsDelegated)
+                                    {
+                                        <span class="badge bg-info text-dark" title="Delegated from @item.DelegatedFromUserName">
+                                            <i class="bi bi-arrow-down-left me-1"></i> Delegated: @item.DelegatedFromUserName
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">Direct</span>
+                                    }
+                                </td>
                                 <td>
                                     <a asp-action="Action" asp-route-id="@item.ApprovalInstanceId" class="btn btn-sm btn-primary py-1 px-3 fw-semibold">
                                         <i class="bi bi-check2-circle me-1"></i> Review
@@ -55,10 +86,10 @@
                     else
                     {
                         <tr>
-                            <td colspan="9" class="text-center py-5 text-muted">
+                            <td colspan="10" class="text-center py-5 text-muted">
                                 <i class="bi bi-check-circle-fill text-success fs-1 mb-2 d-block"></i>
                                 <h6 class="fw-bold">All caught up!</h6>
-                                <p class="m-0 small">No pending approval tasks assigned to you.</p>
+                                <p class="m-0 small">No pending approval tasks assigned to you or delegated to you.</p>
                             </td>
                         </tr>
                     }

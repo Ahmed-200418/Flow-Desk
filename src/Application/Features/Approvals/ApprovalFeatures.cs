@@ -49,7 +49,10 @@ public record PendingApprovalSummaryDto(
     string Currency,
     int StepNumber,
     DateTime AssignedAtUtc,
-    DateTime DueAtUtc
+    DateTime DueAtUtc,
+    bool IsDelegated = false,
+    string? DelegatedFromUserName = null,
+    string SlaStatus = "OnTime"
 );
 
 public record ApprovalHistoryDto(
@@ -335,7 +338,8 @@ public class DelegateApprovalCommandHandler : IRequestHandler<DelegateApprovalCo
         var targetUserExists = await _context.Users.AnyAsync(u => u.Id == request.TargetUserId, cancellationToken);
         if (!targetUserExists) throw new NotFoundException("Target user for delegation was not found.");
 
-        instance.Delegate(request.TargetUserId, actorUserId, request.Reason);
+        var action = instance.Delegate(request.TargetUserId, actorUserId, request.Reason);
+        _context.ApprovalActions.Add(action);
 
         // Create new approval instance assigned to delegatee
         var delegatedInstance = new ApprovalInstance(
@@ -368,36 +372,85 @@ public class GetPendingApprovalsQueryHandler : IRequestHandler<GetPendingApprova
     {
         if (!_currentUserService.UserId.HasValue) throw new UnauthorizedException();
         var userId = _currentUserService.UserId.Value;
+        var now = DateTime.UtcNow;
 
         var userRoleIds = await _context.UserRoles
             .Where(ur => ur.UserId == userId)
             .Select(ur => ur.RoleId)
             .ToListAsync(cancellationToken);
 
+        // Fetch active delegations where current user is the delegatee
+        var activeDelegations = await _context.Delegations
+            .AsNoTracking()
+            .Include(d => d.DelegatorUser)
+            .Where(d => d.DelegateeUserId == userId && d.IsActive && d.StartDateUtc <= now && d.EndDateUtc >= now)
+            .ToListAsync(cancellationToken);
+
+        var delegatorUserIds = activeDelegations.Select(d => d.DelegatorUserId).ToList();
+
         var query = _context.ApprovalInstances
             .AsNoTracking()
+            .Include(ai => ai.AssignedUser)
             .Include(ai => ai.Request).ThenInclude(r => r.RequestType)
             .Include(ai => ai.Request).ThenInclude(r => r.RequesterUser)
+            .Include(ai => ai.Actions)
             .Where(ai => ai.Status == ApprovalStatus.Pending &&
-                        (ai.AssignedUserId == userId || (ai.AssignedRoleId.HasValue && userRoleIds.Contains(ai.AssignedRoleId.Value))))
+                        (ai.AssignedUserId == userId ||
+                         (ai.AssignedRoleId.HasValue && userRoleIds.Contains(ai.AssignedRoleId.Value)) ||
+                         (ai.AssignedUserId.HasValue && delegatorUserIds.Contains(ai.AssignedUserId.Value))))
             .OrderBy(ai => ai.DueAtUtc);
 
-        var dtoQuery = query.Select(ai => new PendingApprovalSummaryDto(
-            ai.Id,
-            ai.RequestId,
-            ai.Request.RequestNumber,
-            ai.Request.Title,
-            ai.Request.RequestType.Name,
-            ai.Request.RequesterUserId,
-            ai.Request.RequesterUser.FullName,
-            ai.Request.Priority,
-            ai.Request.TotalAmount,
-            ai.Request.Currency,
-            ai.StepNumber,
-            ai.AssignedAtUtc,
-            ai.DueAtUtc));
+        var instances = await query.ToListAsync(cancellationToken);
 
-        return await PaginatedList<PendingApprovalSummaryDto>.CreateAsync(dtoQuery, request.PageNumber, request.PageSize, cancellationToken);
+        var dtos = instances.Select(ai =>
+        {
+            bool isDelegated = ai.AssignedUserId.HasValue && ai.AssignedUserId.Value != userId && delegatorUserIds.Contains(ai.AssignedUserId.Value);
+            string? delegatedFrom = isDelegated ? activeDelegations.FirstOrDefault(d => d.DelegatorUserId == ai.AssignedUserId.Value)?.DelegatorUser?.FullName : null;
+
+            string slaStatus = "OnTime";
+            var isEscalated = ai.Actions.Any(a => a.Decision == ApprovalDecision.Delegated && a.Comment != null && a.Comment.Contains("Escalated"));
+            if (isEscalated)
+            {
+                slaStatus = "Escalated";
+            }
+            else if (now > ai.DueAtUtc)
+            {
+                slaStatus = "Overdue";
+            }
+            else
+            {
+                var totalDuration = (ai.DueAtUtc - ai.AssignedAtUtc).TotalHours;
+                var elapsedHours = (now - ai.AssignedAtUtc).TotalHours;
+                if (elapsedHours >= (totalDuration * 0.5))
+                {
+                    slaStatus = "Reminder";
+                }
+            }
+
+            return new PendingApprovalSummaryDto(
+                ai.Id,
+                ai.RequestId,
+                ai.Request.RequestNumber,
+                ai.Request.Title,
+                ai.Request.RequestType.Name,
+                ai.Request.RequesterUserId,
+                ai.Request.RequesterUser.FullName,
+                ai.Request.Priority,
+                ai.Request.TotalAmount,
+                ai.Request.Currency,
+                ai.StepNumber,
+                ai.AssignedAtUtc,
+                ai.DueAtUtc,
+                isDelegated,
+                delegatedFrom,
+                slaStatus
+            );
+        }).ToList();
+
+        int count = dtos.Count;
+        var items = dtos.Skip((request.PageNumber - 1) * request.PageSize).Take(request.PageSize).ToList();
+
+        return new PaginatedList<PendingApprovalSummaryDto>(items, count, request.PageNumber, request.PageSize);
     }
 }
 
