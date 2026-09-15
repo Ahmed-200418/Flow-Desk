@@ -254,14 +254,18 @@ public class SubmitRequestCommandHandler : IRequestHandler<SubmitRequestCommand,
     private readonly IWorkflowEvaluator _workflowEvaluator;
     private readonly IApproverResolver _approverResolver;
 
+    private readonly INotificationService? _notificationService;
+
     public SubmitRequestCommandHandler(
         IApplicationDbContext context,
         IWorkflowEvaluator workflowEvaluator,
-        IApproverResolver approverResolver)
+        IApproverResolver approverResolver,
+        INotificationService? notificationService = null)
     {
         _context = context;
         _workflowEvaluator = workflowEvaluator;
         _approverResolver = approverResolver;
+        _notificationService = notificationService;
     }
 
     public async Task<RequestDetailDto> Handle(SubmitRequestCommand request, CancellationToken cancellationToken)
@@ -300,6 +304,16 @@ public class SubmitRequestCommandHandler : IRequestHandler<SubmitRequestCommand,
                     firstStep.TimeoutHours);
 
                 _context.ApprovalInstances.Add(instance);
+
+                if (assignedUserId.HasValue && _notificationService != null)
+                {
+                    await _notificationService.SendNotificationAsync(
+                        assignedUserId.Value,
+                        "Approval Required",
+                        $"Request {req.RequestNumber} ({req.Title}) requires your approval.",
+                        NotificationType.ApprovalRequired,
+                        cancellationToken: cancellationToken);
+                }
             }
         }
 

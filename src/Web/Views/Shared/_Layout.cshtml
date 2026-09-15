@@ -160,6 +160,9 @@
             <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Approvals" ? "active" : "")" asp-controller="Approvals" asp-action="Inbox">
                 <i class="bi bi-check2-square"></i> Pending Approvals
             </a>
+            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Notifications" ? "active" : "")" asp-controller="Notifications" asp-action="Index">
+                <i class="bi bi-bell"></i> Notifications
+            </a>
             <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Delegations" ? "active" : "")" asp-controller="Delegations" asp-action="Index">
                 <i class="bi bi-person-gear"></i> Delegations
             </a>
@@ -176,6 +179,9 @@
             </a>
 
             <div class="nav-section-title">Administration</div>
+            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Jobs" ? "active" : "")" asp-controller="Jobs" asp-action="Index">
+                <i class="bi bi-cpu"></i> Background Jobs
+            </a>
             <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Organizations" ? "active" : "")" asp-controller="Organizations" asp-action="Index">
                 <i class="bi bi-building"></i> Organizations
             </a>
@@ -203,6 +209,14 @@
             </div>
 
             <div class="d-flex align-items-center gap-3">
+                <!-- Notification Bell Button -->
+                <a class="btn btn-light position-relative border p-2" asp-controller="Notifications" asp-action="Index" id="notification-bell-link" title="Notifications">
+                    <i class="bi bi-bell fs-5 text-dark"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" id="notification-unread-badge">
+                        0
+                    </span>
+                </a>
+
                 <div class="dropdown">
                     <button class="btn btn-light d-flex align-items-center gap-2 border dropdown-toggle" type="button" data-bs-toggle="dropdown">
                         <div class="user-avatar">
@@ -214,6 +228,7 @@
                         </div>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                        <li><a class="dropdown-item" asp-controller="Notifications" asp-action="Index"><i class="bi bi-bell me-2"></i> Notifications</a></li>
                         <li><a class="dropdown-item" asp-controller="Auth" asp-action="Profile"><i class="bi bi-person me-2"></i> My Profile</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li>
@@ -258,6 +273,23 @@
 
 <!-- Bootstrap 5 JS Bundle CDN -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Fetch unread notification count asynchronously
+    document.addEventListener("DOMContentLoaded", function () {
+        var badge = document.getElementById("notification-unread-badge");
+        if (badge) {
+            fetch('/Notifications/UnreadCount')
+                .then(function (res) { return res.json(); })
+                .then(function (data) {
+                    if (data && data.count > 0) {
+                        badge.innerText = data.count;
+                        badge.classList.remove("d-none");
+                    }
+                })
+                .catch(function (err) { console.error("Could not fetch unread notifications count", err); });
+        }
+    });
+</script>
 @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

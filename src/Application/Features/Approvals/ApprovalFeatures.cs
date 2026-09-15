@@ -78,18 +78,22 @@ public class ApproveRequestCommandHandler : IRequestHandler<ApproveRequestComman
     private readonly IWorkflowEvaluator? _workflowEvaluator;
     private readonly IApproverResolver? _approverResolver;
 
+    private readonly INotificationService? _notificationService;
+
     public ApproveRequestCommandHandler(
         IApplicationDbContext context,
         ICurrentUserService currentUserService,
         IIdempotencyService idempotencyService,
         IWorkflowEvaluator? workflowEvaluator = null,
-        IApproverResolver? approverResolver = null)
+        IApproverResolver? approverResolver = null,
+        INotificationService? notificationService = null)
     {
         _context = context;
         _currentUserService = currentUserService;
         _idempotencyService = idempotencyService;
         _workflowEvaluator = workflowEvaluator;
         _approverResolver = approverResolver;
+        _notificationService = notificationService;
     }
 
     public async Task Handle(ApproveRequestCommand request, CancellationToken cancellationToken)
@@ -157,12 +161,32 @@ public class ApproveRequestCommandHandler : IRequestHandler<ApproveRequestComman
                 nextStep.TimeoutHours);
 
             _context.ApprovalInstances.Add(nextInstance);
+
+            if (assignedUserId.HasValue && _notificationService != null)
+            {
+                await _notificationService.SendNotificationAsync(
+                    assignedUserId.Value,
+                    "Approval Required",
+                    $"Request {req.RequestNumber} ({req.Title}) is pending your approval at Step {nextStep.StepNumber}.",
+                    NotificationType.ApprovalRequired,
+                    cancellationToken: cancellationToken);
+            }
         }
         else
         {
             // Final step approved -> Mark Request as Approved & Completed
             req.Approve();
             req.Complete();
+
+            if (_notificationService != null)
+            {
+                await _notificationService.SendNotificationAsync(
+                    req.RequesterUserId,
+                    "Request Approved",
+                    $"Congratulations! Your request {req.RequestNumber} ({req.Title}) has been fully approved.",
+                    NotificationType.ApprovalResult,
+                    cancellationToken: cancellationToken);
+            }
         }
 
         try

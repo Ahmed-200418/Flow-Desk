@@ -4,6 +4,8 @@ using FlowDesk.Infrastructure.Options;
 using FlowDesk.Infrastructure.Persistence;
 using FlowDesk.Infrastructure.Persistence.Interceptors;
 using FlowDesk.Infrastructure.Services;
+using Hangfire;
+using Hangfire.MemoryStorage;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -17,6 +19,7 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
+        services.Configure<EmailOptions>(configuration.GetSection(EmailOptions.SectionName));
 
         var jwtOptions = configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>() ?? new JwtOptions();
 
@@ -41,6 +44,21 @@ public static class DependencyInjection
         services.AddScoped<IWorkflowEvaluator, WorkflowEvaluator>();
         services.AddScoped<IApproverResolver, ApproverResolver>();
         services.AddScoped<DatabaseSeeder>();
+
+        // Phase 7: Notifications & Background Processing Services
+        services.AddTransient<IEmailSender, SmtpEmailSender>();
+        services.AddScoped<INotificationService, NotificationService>();
+        services.AddTransient<IBackgroundJobService, HangfireBackgroundJobService>();
+
+        // Hangfire Configuration with Memory Storage
+        services.AddHangfire(config =>
+        {
+            config.UseSimpleAssemblyNameTypeSerializer()
+                  .UseRecommendedSerializerSettings()
+                  .UseMemoryStorage();
+        });
+
+        services.AddHangfireServer();
 
         services.AddAuthentication(defaultScheme: JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>

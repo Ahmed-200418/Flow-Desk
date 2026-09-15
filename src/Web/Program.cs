@@ -4,6 +4,7 @@ using FlowDesk.Infrastructure;
 using FlowDesk.Infrastructure.Persistence;
 using FlowDesk.Web.Authorization;
 using FlowDesk.Web.Services;
+using Hangfire;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Serilog;
@@ -48,6 +49,14 @@ using (var scope = app.Services.CreateScope())
 {
     var seeder = scope.ServiceProvider.GetRequiredService<DatabaseSeeder>();
     await seeder.SeedAsync();
+
+    // Register Recurring Background Jobs
+    var recurringJobManager = scope.ServiceProvider.GetRequiredService<IRecurringJobManager>();
+    recurringJobManager.AddOrUpdate<IBackgroundJobService>("SendApprovalReminder", j => j.ExecuteApprovalRemindersAsync(CancellationToken.None), "*/15 * * * *");
+    recurringJobManager.AddOrUpdate<IBackgroundJobService>("CheckExpiredApprovals", j => j.ExecuteCheckExpiredApprovalsAsync(CancellationToken.None), "*/30 * * * *");
+    recurringJobManager.AddOrUpdate<IBackgroundJobService>("ProcessEscalations", j => j.ExecuteProcessEscalationsAsync(CancellationToken.None), Cron.Hourly());
+    recurringJobManager.AddOrUpdate<IBackgroundJobService>("GenerateScheduledReports", j => j.ExecuteGenerateScheduledReportsAsync(CancellationToken.None), Cron.Daily());
+    recurringJobManager.AddOrUpdate<IBackgroundJobService>("CleanupTemporaryFiles", j => j.ExecuteCleanupTemporaryFilesAsync(CancellationToken.None), Cron.Daily(2));
 }
 
 if (!app.Environment.IsDevelopment())
@@ -63,6 +72,9 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Hangfire Dashboard Endpoint
+app.UseHangfireDashboard("/hangfire");
 
 app.MapControllerRoute(
     name: "default",
