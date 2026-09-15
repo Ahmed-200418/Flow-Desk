@@ -36,12 +36,35 @@
             z-index: 1000;
             transition: all 0.3s ease;
             box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #sidebar::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+
+        #sidebar::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 3px;
+        }
+
+        #sidebar::-webkit-scrollbar-thumb:hover {
+            background: #475569;
         }
 
         #sidebar .brand-header {
             padding: 1.25rem 1.5rem;
             background: #020617;
             border-bottom: 1px solid #1e293b;
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
 
         #sidebar .nav-link {

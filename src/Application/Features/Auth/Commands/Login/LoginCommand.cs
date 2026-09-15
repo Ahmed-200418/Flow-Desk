@@ -55,7 +55,7 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResponseDto
 
         if (user == null || !user.IsActive)
         {
-            throw new UnauthorizedException("Invalid credentials or account is inactive.");
+            throw new UnauthorizedException("Invalid credentials.");
         }
 
         if (user.IsLockedOut)

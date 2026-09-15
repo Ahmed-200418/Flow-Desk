@@ -1,3 +1,4 @@
+using System.Threading.RateLimiting;
 using Asp.Versioning;
 using FlowDesk.API.Authorization;
 using FlowDesk.API.Middleware;
@@ -5,18 +6,22 @@ using FlowDesk.API.Services;
 using FlowDesk.Application;
 using FlowDesk.Application.Common.Interfaces;
 using FlowDesk.Infrastructure;
+using FlowDesk.Infrastructure.Logging;
 using FlowDesk.Infrastructure.Persistence;
+using FlowDesk.Infrastructure.Security;
 using Hangfire;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.OpenApi.Models;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Serilog Configuration
+// Serilog Configuration with Sensitive Data Redaction
 builder.Host.UseSerilog((context, configuration) =>
     configuration.ReadFrom.Configuration(context.Configuration)
         .Enrich.FromLogContext()
+        .Destructure.With<SensitiveDataRedactionDestructuringPolicy>()
         .WriteTo.Console());
 
 // Add Clean Architecture Layers
@@ -26,6 +31,32 @@ builder.Services.AddInfrastructureServices(builder.Configuration);
 // Add Presentation / API Services
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+
+// Add CORS policy for production readiness
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("ProductionCorsPolicy", policy =>
+    {
+        var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+            ?? new[] { "http://localhost:3000", "https://localhost:3000" };
+        policy.WithOrigins(allowedOrigins)
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
+});
+
+// Rate Limiting for Authentication endpoints
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddFixedWindowLimiter("LoginPolicy", opt =>
+    {
+        opt.PermitLimit = 5;
+        opt.Window = TimeSpan.FromMinutes(1);
+        opt.QueueLimit = 0;
+    });
+});
 
 // Permission Authorization
 builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
@@ -104,7 +135,10 @@ using (var scope = app.Services.CreateScope())
 
 // Middleware Pipeline
 app.UseMiddleware<CorrelationIdMiddleware>();
+app.UseMiddleware<SecurityHeadersMiddleware>();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseCors("ProductionCorsPolicy");
+app.UseRateLimiter();
 
 if (app.Environment.IsDevelopment())
 {
@@ -120,8 +154,11 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Hangfire Dashboard Endpoint
-app.UseHangfireDashboard("/hangfire");
+// Protected Hangfire Dashboard Endpoint
+app.UseHangfireDashboard("/hangfire", new DashboardOptions
+{
+    Authorization = new[] { new HangfireDashboardAuthorizationFilter() }
+});
 
 // Map Health Checks
 app.MapHealthChecks("/health");

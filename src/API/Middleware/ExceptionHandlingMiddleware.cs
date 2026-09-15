@@ -96,6 +96,7 @@ public class ExceptionHandlingMiddleware
                 })
         };
 
+        problemDetails.Extensions["traceId"] = context.TraceIdentifier;
         context.Response.StatusCode = statusCode;
         var json = JsonSerializer.Serialize(problemDetails);
 

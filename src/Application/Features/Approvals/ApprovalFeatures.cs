@@ -428,8 +428,9 @@ public class GetPendingApprovalsQueryHandler : IRequestHandler<GetPendingApprova
 
         var dtos = instances.Select(ai =>
         {
-            bool isDelegated = ai.AssignedUserId.HasValue && ai.AssignedUserId.Value != userId && delegatorUserIds.Contains(ai.AssignedUserId.Value);
-            string? delegatedFrom = isDelegated ? activeDelegations.FirstOrDefault(d => d.DelegatorUserId == ai.AssignedUserId.Value)?.DelegatorUser?.FullName : null;
+            Guid? assignedUserId = ai.AssignedUserId;
+            bool isDelegated = assignedUserId.HasValue && assignedUserId.Value != userId && delegatorUserIds.Contains(assignedUserId.Value);
+            string? delegatedFrom = isDelegated && assignedUserId.HasValue ? activeDelegations.FirstOrDefault(d => d.DelegatorUserId == assignedUserId.Value)?.DelegatorUser?.FullName : null;
 
             string slaStatus = "OnTime";
             var isEscalated = ai.Actions.Any(a => a.Decision == ApprovalDecision.Delegated && a.Comment != null && a.Comment.Contains("Escalated"));

@@ -58,7 +58,7 @@ public class ProcessSlaAndEscalationsCommandHandler : IRequestHandler<ProcessSla
         var pendingApprovals = await _context.ApprovalInstances
             .Include(ai => ai.Request).ThenInclude(r => r.RequesterUser)
             .Include(ai => ai.Request).ThenInclude(r => r.RequestType)
-            .Include(ai => ai.AssignedUser).ThenInclude(u => u.Department)
+            .Include(ai => ai.AssignedUser!).ThenInclude(u => u!.Department)
             .Include(ai => ai.Actions)
             .Where(ai => ai.Status == ApprovalStatus.Pending)
             .ToListAsync(cancellationToken);

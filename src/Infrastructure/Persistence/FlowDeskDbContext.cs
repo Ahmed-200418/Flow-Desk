@@ -79,5 +79,7 @@ public class FlowDeskDbContext : DbContext, IApplicationDbContext
     {
         base.OnConfiguring(optionsBuilder);
         optionsBuilder.AddInterceptors(_auditableEntityInterceptor);
+        optionsBuilder.ConfigureWarnings(warnings =>
+            warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
     }
 }

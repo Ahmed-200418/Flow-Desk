@@ -144,6 +144,7 @@ public class CreateRequestCommandHandler : IRequestHandler<CreateRequestCommand,
     {
         var r = await context.Requests
             .AsNoTracking()
+            .AsSplitQuery()
             .Include(x => x.RequestType)
             .Include(x => x.RequesterUser)
             .Include(x => x.Department)
@@ -420,7 +421,10 @@ public class GetRequestsQueryHandler : IRequestHandler<GetRequestsQuery, Paginat
                 r.SubmittedAtUtc,
                 r.CompletedAtUtc));
 
-        return await PaginatedList<RequestSummaryDto>.CreateAsync(dtoQuery, request.PageNumber, request.PageSize, cancellationToken);
+        var clampedPageSize = Math.Min(Math.Max(1, request.PageSize), 100);
+        var clampedPageNumber = Math.Max(1, request.PageNumber);
+
+        return await PaginatedList<RequestSummaryDto>.CreateAsync(dtoQuery, clampedPageNumber, clampedPageSize, cancellationToken);
     }
 }
 
@@ -430,15 +434,49 @@ public record GetRequestByIdQuery(Guid Id) : IRequest<RequestDetailDto>;
 public class GetRequestByIdQueryHandler : IRequestHandler<GetRequestByIdQuery, RequestDetailDto>
 {
     private readonly IApplicationDbContext _context;
+    private readonly ICurrentUserService _currentUserService;
 
-    public GetRequestByIdQueryHandler(IApplicationDbContext context)
+    public GetRequestByIdQueryHandler(IApplicationDbContext context, ICurrentUserService currentUserService)
     {
         _context = context;
+        _currentUserService = currentUserService;
     }
 
     public async Task<RequestDetailDto> Handle(GetRequestByIdQuery request, CancellationToken cancellationToken)
     {
-        return await CreateRequestCommandHandler.GetRequestDetailByIdAsync(request.Id, _context, cancellationToken);
+        var dto = await CreateRequestCommandHandler.GetRequestDetailByIdAsync(request.Id, _context, cancellationToken);
+
+        if (_currentUserService.UserId.HasValue)
+        {
+            var userId = _currentUserService.UserId.Value;
+
+            if (dto.RequesterUserId == userId)
+            {
+                return dto;
+            }
+
+            var isApproverOrActor = await _context.ApprovalInstances
+                .AnyAsync(ai => ai.RequestId == request.Id &&
+                                (ai.AssignedUserId == userId || ai.Actions.Any(a => a.ActorUserId == userId)), cancellationToken);
+
+            if (isApproverOrActor)
+            {
+                return dto;
+            }
+
+            var hasGlobalPermission = await _context.UserRoles
+                .Where(ur => ur.UserId == userId)
+                .AnyAsync(ur => ur.Role.Name == "SuperAdmin" ||
+                                ur.Role.Name == "OrganizationAdmin" ||
+                                ur.Role.RolePermissions.Any(rp => rp.Permission.Code == "Permissions.Purchase.Read"), cancellationToken);
+
+            if (!hasGlobalPermission)
+            {
+                throw new ForbiddenException("You are not authorized to view this request.");
+            }
+        }
+
+        return dto;
     }
 }
 

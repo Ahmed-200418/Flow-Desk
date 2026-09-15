@@ -67,15 +67,41 @@ public static class DependencyInjection
         services.AddScoped<INotificationService, NotificationService>();
         services.AddTransient<IBackgroundJobService, HangfireBackgroundJobService>();
 
-        // Hangfire Configuration with Memory Storage
+        // Hangfire Configuration with SQL Server Persistent Storage for Production, Memory fallback for testing
         services.AddHangfire(config =>
         {
             config.UseSimpleAssemblyNameTypeSerializer()
-                  .UseRecommendedSerializerSettings()
-                  .UseMemoryStorage();
+                  .UseRecommendedSerializerSettings();
+
+            var hangfireConn = configuration.GetConnectionString("HangfireConnection") ?? connectionString;
+            if (!string.IsNullOrWhiteSpace(hangfireConn) && !hangfireConn.Contains("InMemoryDatabase", StringComparison.OrdinalIgnoreCase))
+            {
+                try
+                {
+                    config.UseSqlServerStorage(hangfireConn);
+                }
+                catch
+                {
+                    config.UseMemoryStorage();
+                }
+            }
+            else
+            {
+                config.UseMemoryStorage();
+            }
         });
 
         services.AddHangfireServer();
+
+        var secretKey = Environment.GetEnvironmentVariable("JWT_SECRET");
+        if (string.IsNullOrWhiteSpace(secretKey))
+        {
+            secretKey = jwtOptions.Secret;
+        }
+        if (string.IsNullOrWhiteSpace(secretKey))
+        {
+            secretKey = "FlowDesk_Dev_Default_Secret_Key_For_Local_Development_Only_Must_Be_32_Chars!";
+        }
 
         services.AddAuthentication(defaultScheme: JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
@@ -86,9 +112,9 @@ public static class DependencyInjection
                     ValidateAudience = true,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-                    ValidIssuer = jwtOptions.Issuer,
-                    ValidAudience = jwtOptions.Audience,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Secret)),
+                    ValidIssuer = string.IsNullOrWhiteSpace(jwtOptions.Issuer) ? "FlowDesk.API" : jwtOptions.Issuer,
+                    ValidAudience = string.IsNullOrWhiteSpace(jwtOptions.Audience) ? "FlowDesk.Clients" : jwtOptions.Audience,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
                     ClockSkew = TimeSpan.Zero
                 };
             });

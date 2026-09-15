@@ -22,7 +22,7 @@ public class SmtpEmailSender : IEmailSender
     {
         if (!_options.EnableEmailSending || string.IsNullOrWhiteSpace(_options.SmtpServer))
         {
-            _logger.LogInformation("[MOCK EMAIL] To: {Recipient}, Subject: {Subject}\nBody: {Body}", recipientEmail, subject, htmlMessage);
+            _logger.LogInformation("[MOCK EMAIL] To: {Recipient}, Subject: {Subject} (Body content suppressed for security)", recipientEmail, subject);
             await Task.CompletedTask;
             return;
         }

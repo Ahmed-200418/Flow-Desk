@@ -90,11 +90,12 @@ public class RequestConfiguration : IEntityTypeConfiguration<Request>
         builder.Property(r => r.Description).HasMaxLength(4000).IsRequired();
         builder.Property(r => r.TotalAmount).HasPrecision(18, 4);
         builder.Property(r => r.Currency).HasMaxLength(10).IsRequired();
-        builder.Property(r => r.RowVersion);
+        builder.Property(r => r.RowVersion).IsConcurrencyToken();
 
         builder.HasIndex(r => r.Status);
         builder.HasIndex(r => r.RequesterUserId);
         builder.HasIndex(r => r.OrganizationId);
+        builder.HasIndex(r => new { r.OrganizationId, r.Status });
 
         builder.HasOne(r => r.RequestType)
             .WithMany(rt => rt.Requests)
@@ -259,9 +260,11 @@ public class ApprovalInstanceConfiguration : IEntityTypeConfiguration<ApprovalIn
     {
         builder.ToTable("ApprovalInstances");
         builder.HasKey(ai => ai.Id);
-        builder.Property(ai => ai.RowVersion).IsConcurrencyToken(false);
+        builder.Property(ai => ai.RowVersion).IsConcurrencyToken();
         builder.HasIndex(ai => ai.Status);
         builder.HasIndex(ai => ai.AssignedUserId);
+        builder.HasIndex(ai => new { ai.RequestId, ai.Status });
+        builder.HasIndex(ai => new { ai.AssignedUserId, ai.Status });
 
         builder.HasOne(ai => ai.Request)
             .WithMany(r => r.ApprovalInstances)

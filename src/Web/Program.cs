@@ -1,20 +1,24 @@
 using FlowDesk.Application;
 using FlowDesk.Application.Common.Interfaces;
 using FlowDesk.Infrastructure;
+using FlowDesk.Infrastructure.Logging;
 using FlowDesk.Infrastructure.Persistence;
+using FlowDesk.Infrastructure.Security;
 using FlowDesk.Web.Authorization;
 using FlowDesk.Web.Services;
 using Hangfire;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Serilog Configuration
+// Serilog Configuration with Sensitive Data Redaction
 builder.Host.UseSerilog((context, configuration) =>
     configuration.ReadFrom.Configuration(context.Configuration)
         .Enrich.FromLogContext()
+        .Destructure.With<SensitiveDataRedactionDestructuringPolicy>()
         .WriteTo.Console());
 
 // Add Clean Architecture Layers
@@ -29,7 +33,7 @@ builder.Services.AddScoped<ICurrentUserService, CurrentWebUserService>();
 builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
 builder.Services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
 
-// Authentication with Cookie Scheme
+// Authentication with Secure Cookie Configuration
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
@@ -37,10 +41,17 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.AccessDeniedPath = "/Auth/AccessDenied";
         options.ExpireTimeSpan = TimeSpan.FromHours(8);
         options.SlidingExpiration = true;
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        options.Cookie.SameSite = SameSiteMode.Lax;
+        options.Cookie.Name = "__Host-FlowDesk-Auth";
     });
 
-// Controllers with Views (MVC)
-builder.Services.AddControllersWithViews();
+// Controllers with Views (MVC) & Auto Anti-Forgery Protection
+builder.Services.AddControllersWithViews(options =>
+{
+    options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
+});
 
 var app = builder.Build();
 
@@ -73,8 +84,11 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Hangfire Dashboard Endpoint
-app.UseHangfireDashboard("/hangfire");
+// Protected Hangfire Dashboard Endpoint
+app.UseHangfireDashboard("/hangfire", new DashboardOptions
+{
+    Authorization = new[] { new HangfireDashboardAuthorizationFilter() }
+});
 
 app.MapControllerRoute(
     name: "default",

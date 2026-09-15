@@ -4,6 +4,8 @@ using FlowDesk.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
+using Microsoft.Extensions.Hosting;
+
 namespace FlowDesk.Infrastructure.Persistence;
 
 public class DatabaseSeeder
@@ -11,15 +13,18 @@ public class DatabaseSeeder
     private readonly FlowDeskDbContext _context;
     private readonly IPasswordHasher _passwordHasher;
     private readonly ILogger<DatabaseSeeder> _logger;
+    private readonly IHostEnvironment _environment;
 
     public DatabaseSeeder(
         FlowDeskDbContext context,
         IPasswordHasher passwordHasher,
-        ILogger<DatabaseSeeder> logger)
+        ILogger<DatabaseSeeder> logger,
+        IHostEnvironment environment)
     {
         _context = context;
         _passwordHasher = passwordHasher;
         _logger = logger;
+        _environment = environment;
     }
 
     public async Task SeedAsync()
@@ -150,6 +155,12 @@ public class DatabaseSeeder
 
     private async Task SeedSuperAdminUserAsync()
     {
+        if (!_environment.IsDevelopment() && !_environment.IsEnvironment("Testing"))
+        {
+            _logger.LogInformation("Database Seeder: Skipping default Super Admin seeding in Production environment.");
+            return;
+        }
+
         const string superAdminEmail = "admin@flowdesk.local";
         var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == superAdminEmail);
 

@@ -44,4 +44,38 @@ public class CleanArchitectureTests
 
         Assert.True(result.IsSuccessful, "API Controllers must not depend directly on Infrastructure/DbContext.");
     }
+
+    [Fact]
+    public void Handlers_Should_ResideInApplicationProject()
+    {
+        var result = Types.InAssembly(typeof(Application.DependencyInjection).Assembly)
+            .That()
+            .HaveNameEndingWith("Handler")
+            .And()
+            .DoNotResideInNamespace("FlowDesk.API.Authorization")
+            .Should()
+            .ResideInNamespaceStartingWith(ApplicationNamespace)
+            .GetResult();
+
+        Assert.True(result.IsSuccessful, "Application Command/Query handlers must reside within Application project.");
+    }
+
+    [Fact]
+    public void Controllers_Should_InheritFromApiControllerBase()
+    {
+        var result = Types.InAssembly(typeof(API.Controllers.ApiControllerBase).Assembly)
+            .That()
+            .ResideInNamespace($"{ApiNamespace}.Controllers")
+            .And()
+            .AreClasses()
+            .And()
+            .DoNotHaveName("ApiControllerBase")
+            .And()
+            .HaveNameEndingWith("Controller")
+            .Should()
+            .Inherit(typeof(API.Controllers.ApiControllerBase))
+            .GetResult();
+
+        Assert.True(result.IsSuccessful, "All API controllers must inherit from ApiControllerBase.");
+    }
 }

@@ -48,7 +48,7 @@ public class ResetPasswordCommandHandler : IRequestHandler<ResetPasswordCommand>
 
         if (user == null || !user.IsActive)
         {
-            throw new NotFoundException("User not found or inactive.");
+            throw new UnauthorizedException("Invalid or expired password reset token.");
         }
 
         // Validate reset token (for Phase 1 basic reset foundation)
