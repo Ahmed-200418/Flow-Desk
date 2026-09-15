@@ -43,6 +43,7 @@ public static class DependencyInjection
         services.AddSingleton<IIdempotencyService, InMemoryIdempotencyService>();
         services.AddScoped<IWorkflowEvaluator, WorkflowEvaluator>();
         services.AddScoped<IApproverResolver, ApproverResolver>();
+        services.AddScoped<IAuditService, AuditService>();
         services.AddScoped<DatabaseSeeder>();
 
         // Phase 7: Notifications & Background Processing Services

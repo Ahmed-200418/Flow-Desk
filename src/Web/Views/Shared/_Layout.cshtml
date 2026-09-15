@@ -179,6 +179,9 @@
             </a>
 
             <div class="nav-section-title">Administration</div>
+            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "AuditLogs" ? "active" : "")" asp-controller="AuditLogs" asp-action="Index">
+                <i class="bi bi-shield-check"></i> Audit & Compliance
+            </a>
             <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Jobs" ? "active" : "")" asp-controller="Jobs" asp-action="Index">
                 <i class="bi bi-cpu"></i> Background Jobs
             </a>

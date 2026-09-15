@@ -1,0 +1,259 @@
+@model FlowDesk.Application.Common.Models.PaginatedList<FlowDesk.Application.Features.Audit.AuditLogDto>
+@using FlowDesk.Application.Features.Audit
+@{
+    var stats = ViewData["Stats"] as AuditStatsDto;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold text-dark mb-1"><i class="bi bi-shield-check text-primary me-2"></i> Audit Trail & Compliance</h3>
+        <p class="text-muted mb-0">Immutable system activity, security audit trail, and entity history records.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-action="Export"
+           asp-route-search="@ViewData["Search"]"
+           asp-route-entityName="@ViewData["EntityName"]"
+           asp-route-action="@ViewData["Action"]"
+           asp-route-fromDate="@ViewData["FromDate"]"
+           asp-route-toDate="@ViewData["ToDate"]"
+           class="btn btn-outline-success">
+            <i class="bi bi-file-earmark-spreadsheet me-1"></i> Export CSV
+        </a>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+@if (stats != null)
+{
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card card-custom h-100 p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small fw-semibold">TOTAL AUDIT LOGS</div>
+                        <div class="fs-3 fw-bold text-dark">@stats.TotalLogs.ToString("N0")</div>
+                    </div>
+                    <div class="bg-primary-subtle text-primary p-3 rounded-3">
+                        <i class="bi bi-list-columns-reverse fs-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card card-custom h-100 p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small fw-semibold">TODAY'S EVENTS</div>
+                        <div class="fs-3 fw-bold text-info">@stats.TodayLogs.ToString("N0")</div>
+                    </div>
+                    <div class="bg-info-subtle text-info p-3 rounded-3">
+                        <i class="bi bi-calendar-event fs-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card card-custom h-100 p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small fw-semibold">SECURITY EVENTS</div>
+                        <div class="fs-3 fw-bold text-warning">@stats.SecurityEventsCount.ToString("N0")</div>
+                    </div>
+                    <div class="bg-warning-subtle text-warning p-3 rounded-3">
+                        <i class="bi bi-shield-lock fs-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card card-custom h-100 p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small fw-semibold">UNIQUE ACTORS</div>
+                        <div class="fs-3 fw-bold text-success">@stats.UniqueUsersCount.ToString("N0")</div>
+                    </div>
+                    <div class="bg-success-subtle text-success p-3 rounded-3">
+                        <i class="bi bi-people fs-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Filter Bar -->
+<div class="card card-custom mb-4">
+    <div class="card-body">
+        <form method="get" asp-action="Index" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label small fw-semibold">Search Keywords</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                    <input type="text" name="search" class="form-control" placeholder="Search email, IP, action..." value="@ViewData["Search"]" />
+                </div>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small fw-semibold">Entity Type</label>
+                <input type="text" name="entityName" class="form-control" placeholder="Request, User..." value="@ViewData["EntityName"]" />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small fw-semibold">Action</label>
+                <input type="text" name="action" class="form-control" placeholder="Create, Approve..." value="@ViewData["Action"]" />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small fw-semibold">From Date</label>
+                <input type="datetime-local" name="fromDate" class="form-control" value="@ViewData["FromDate"]" />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small fw-semibold">To Date</label>
+                <input type="datetime-local" name="toDate" class="form-control" value="@ViewData["ToDate"]" />
+            </div>
+            <div class="col-md-1 d-flex align-items-end gap-1">
+                <button type="submit" class="btn btn-primary w-100" title="Apply Filters"><i class="bi bi-funnel-fill"></i></button>
+                <a asp-action="Index" class="btn btn-outline-secondary" title="Clear Filters"><i class="bi bi-x-lg"></i></a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Logs Table Card -->
+<div class="card card-custom">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-table me-2"></i> Audit Records (@Model.TotalCount total)</span>
+        <small class="text-muted"><i class="bi bi-lock-fill me-1"></i> Append-Only Immutable Records</small>
+    </div>
+    <div class="card-body p-0">
+        @if (!Model.Items.Any())
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-shield-x fs-1 text-muted"></i>
+                <h5 class="mt-3 text-secondary">No Audit Records Found</h5>
+                <p class="text-muted">No system activity matching the specified criteria was logged.</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Timestamp (UTC)</th>
+                            <th>Actor</th>
+                            <th>Action</th>
+                            <th>Entity Target</th>
+                            <th>IP Address</th>
+                            <th class="text-end">Options</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var log in Model.Items)
+                        {
+                            var badgeClass = "bg-secondary";
+                            if (log.Action.Contains("Auth") || log.Action.Contains("Login")) badgeClass = "bg-danger";
+                            else if (log.Action.Contains("Create") || log.Action.Contains("Added")) badgeClass = "bg-success";
+                            else if (log.Action.Contains("Approve")) badgeClass = "bg-primary";
+                            else if (log.Action.Contains("Reject") || log.Action.Contains("Delete")) badgeClass = "bg-warning text-dark";
+                            else if (log.Action.Contains("Update") || log.Action.Contains("Modified")) badgeClass = "bg-info text-dark";
+
+                            <tr>
+                                <td>
+                                    <div class="fw-semibold text-dark">@log.TimestampUtc.ToString("yyyy-MM-dd HH:mm:ss")</div>
+                                    <small class="text-muted">@log.TimestampUtc.ToString("ffff") (ticks)</small>
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(log.UserEmail))
+                                    {
+                                        <div class="fw-semibold text-dark"><i class="bi bi-person me-1"></i>@log.UserEmail</div>
+                                        @if (log.UserId.HasValue)
+                                        {
+                                            <small class="text-muted font-monospace" style="font-size: 0.75rem;">@log.UserId.Value.ToString().Substring(0, 8)...</small>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-light text-muted border"><i class="bi bi-cpu me-1"></i>System</span>
+                                    }
+                                </td>
+                                <td>
+                                    <span class="badge @badgeClass">@log.Action</span>
+                                </td>
+                                <td>
+                                    <div>
+                                        <span class="fw-bold">@log.EntityName</span>
+                                    </div>
+                                    <a asp-action="EntityHistory" asp-route-entityName="@log.EntityName" asp-route-entityId="@log.EntityId" class="small text-decoration-none text-primary" title="View timeline for this entity">
+                                        <i class="bi bi-clock-history me-1"></i>ID: @(log.EntityId.Length > 16 ? log.EntityId.Substring(0, 16) + "..." : log.EntityId)
+                                    </a>
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(log.IpAddress))
+                                    {
+                                        <span class="font-monospace small text-dark"><i class="bi bi-globe me-1"></i>@log.IpAddress</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">Local / Internal</span>
+                                    }
+                                </td>
+                                <td class="text-end">
+                                    <a asp-action="Details" asp-route-id="@log.Id" class="btn btn-sm btn-outline-primary me-1" title="View Full Log Details">
+                                        <i class="bi bi-eye"></i> Details
+                                    </a>
+                                    <a asp-action="EntityHistory" asp-route-entityName="@log.EntityName" asp-route-entityId="@log.EntityId" class="btn btn-sm btn-outline-info" title="View Entity Change History">
+                                        <i class="bi bi-timeline"></i> History
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+
+    <!-- Pagination Footer -->
+    @if (Model.TotalPages > 1)
+    {
+        <div class="card-footer bg-white d-flex justify-content-between align-items-center py-3">
+            <div class="text-muted small">
+                Showing Page <strong>@Model.PageNumber</strong> of <strong>@Model.TotalPages</strong> (@Model.TotalCount records)
+            </div>
+            <nav>
+                <ul class="pagination pagination-sm m-0">
+                    <li class="page-item @(!Model.HasPreviousPage ? "disabled" : "")">
+                        <a class="page-item page-link" asp-action="Index"
+                           asp-route-page="@(Model.PageNumber - 1)"
+                           asp-route-search="@ViewData["Search"]"
+                           asp-route-entityName="@ViewData["EntityName"]"
+                           asp-route-action="@ViewData["Action"]"
+                           asp-route-fromDate="@ViewData["FromDate"]"
+                           asp-route-toDate="@ViewData["ToDate"]">Previous</a>
+                    </li>
+
+                    @for (int p = Math.Max(1, Model.PageNumber - 2); p <= Math.Min(Model.TotalPages, Model.PageNumber + 2); p++)
+                    {
+                        <li class="page-item @(p == Model.PageNumber ? "active" : "")">
+                            <a class="page-link" asp-action="Index"
+                               asp-route-page="@p"
+                               asp-route-search="@ViewData["Search"]"
+                               asp-route-entityName="@ViewData["EntityName"]"
+                               asp-route-action="@ViewData["Action"]"
+                               asp-route-fromDate="@ViewData["FromDate"]"
+                               asp-route-toDate="@ViewData["ToDate"]">@p</a>
+                        </li>
+                    }
+
+                    <li class="page-item @(!Model.HasNextPage ? "disabled" : "")">
+                        <a class="page-link" asp-action="Index"
+                           asp-route-page="@(Model.PageNumber + 1)"
+                           asp-route-search="@ViewData["Search"]"
+                           asp-route-entityName="@ViewData["EntityName"]"
+                           asp-route-action="@ViewData["Action"]"
+                           asp-route-fromDate="@ViewData["FromDate"]"
+                           asp-route-toDate="@ViewData["ToDate"]">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    }
+</div>

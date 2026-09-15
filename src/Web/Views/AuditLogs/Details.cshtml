@@ -1,0 +1,99 @@
+@model FlowDesk.Application.Features.Audit.AuditLogDetailDto
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <a asp-action="Index" class="btn btn-outline-secondary btn-sm me-2 mb-2"><i class="bi bi-arrow-left me-1"></i> Back to Audit Logs</a>
+        <h3 class="fw-bold text-dark mb-1"><i class="bi bi-file-earmark-text text-primary me-2"></i> Audit Record Details</h3>
+        <p class="text-muted mb-0">Record ID: <span class="font-monospace">@Model.Id</span></p>
+    </div>
+    <div>
+        <a asp-action="EntityHistory" asp-route-entityName="@Model.EntityName" asp-route-entityId="@Model.EntityId" class="btn btn-outline-info">
+            <i class="bi bi-clock-history me-1"></i> View Entity Timeline
+        </a>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Metadata Card -->
+    <div class="col-lg-4">
+        <div class="card card-custom h-100">
+            <div class="card-header bg-light">
+                <i class="bi bi-info-circle me-2"></i> Record Metadata
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless table-sm mb-0">
+                    <tbody>
+                        <tr>
+                            <td class="text-muted fw-semibold">Action:</td>
+                            <td><span class="badge bg-primary">@Model.Action</span></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted fw-semibold">Entity Type:</td>
+                            <td><span class="fw-bold">@Model.EntityName</span></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted fw-semibold">Entity ID:</td>
+                            <td><span class="font-monospace text-break small">@Model.EntityId</span></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted fw-semibold">Timestamp (UTC):</td>
+                            <td><div class="fw-semibold">@Model.TimestampUtc.ToString("yyyy-MM-dd HH:mm:ss.fff")</div></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted fw-semibold">Actor Email:</td>
+                            <td>@(Model.UserEmail ?? "System / Automated")</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted fw-semibold">Actor User ID:</td>
+                            <td><span class="font-monospace small">@(Model.UserId?.ToString() ?? "N/A")</span></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted fw-semibold">IP Address:</td>
+                            <td><span class="font-monospace">@(Model.IpAddress ?? "Local / System")</span></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted fw-semibold">User Agent:</td>
+                            <td><small class="text-muted text-break">@(Model.UserAgent ?? "N/A")</small></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Diffs Card -->
+    <div class="col-lg-8">
+        <div class="card card-custom h-100">
+            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-code-square me-2"></i> State Diffs (Old vs New)</span>
+                <small class="text-muted"><i class="bi bi-shield-check me-1"></i> Redact-Protected</small>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold text-danger"><i class="bi bi-dash-circle me-1"></i> Old Values (Before)</label>
+                        @if (!string.IsNullOrEmpty(Model.OldValuesJson))
+                        {
+                            <pre class="bg-dark text-warning p-3 rounded-3 font-monospace small" style="max-height: 400px; overflow-y: auto;"><code>@Model.OldValuesJson</code></pre>
+                        }
+                        else
+                        {
+                            <div class="alert alert-light border text-muted small">No prior state recorded (Creation event).</div>
+                        }
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold text-success"><i class="bi bi-plus-circle me-1"></i> New Values (After)</label>
+                        @if (!string.IsNullOrEmpty(Model.NewValuesJson))
+                        {
+                            <pre class="bg-dark text-success p-3 rounded-3 font-monospace small" style="max-height: 400px; overflow-y: auto;"><code>@Model.NewValuesJson</code></pre>
+                        }
+                        else
+                        {
+                            <div class="alert alert-light border text-muted small">No new state recorded (Deletion event).</div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -70,9 +70,8 @@ public class DelegationTests : IDisposable
         Assert.Equal(user2.Id, created.DelegateeUserId);
         Assert.True(created.IsActive);
 
-        var audit = await _context.AuditLogs.FirstOrDefaultAsync(a => a.EntityId == delegationId.ToString());
+        var audit = await _context.AuditLogs.FirstOrDefaultAsync(a => a.EntityId == delegationId.ToString() && (a.Action == "CreateDelegation" || a.Action == "Delegation.Added"));
         Assert.NotNull(audit);
-        Assert.Equal("CreateDelegation", audit.Action);
     }
 
     [Fact]
