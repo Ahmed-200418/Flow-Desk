@@ -3,157 +3,165 @@
     ViewData["Title"] = $"Request #{Model.RequestNumber}";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-200">
     <div>
-        <h4 class="fw-bold m-0">Request #@Model.RequestNumber</h4>
-        <small class="text-muted">Type: @Model.RequestTypeName &bull; Created @Model.CreatedAtUtc.ToString("yyyy-MM-dd HH:mm")</small>
+        <div class="flex items-center gap-3 mb-1">
+            <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Request #@Model.RequestNumber</h1>
+            <span class="px-3 py-1 rounded-full text-xs font-bold bg-@Model.Status.ToString().ToLower()">@Model.Status</span>
+        </div>
+        <p class="text-sm text-slate-500">Category: <strong class="text-slate-800">@Model.RequestTypeName</strong> &bull; Created @Model.CreatedAtUtc.ToString("yyyy-MM-dd HH:mm")</p>
     </div>
-    <div class="d-flex gap-2">
-        <a asp-action="Index" class="btn btn-light border"><i class="bi bi-arrow-left me-1"></i> Back</a>
+    <div class="flex flex-wrap items-center gap-2">
+        <a asp-action="Index" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors shadow-xs">
+            <i class="bi bi-arrow-left"></i> Back to List
+        </a>
         
         @if (Model.Status == RequestStatus.Draft || Model.Status == RequestStatus.Returned)
         {
-            <form asp-action="Submit" asp-route-id="@Model.Id" method="post" class="d-inline">
+            <form asp-action="Submit" asp-route-id="@Model.Id" method="post" class="inline">
                 @Html.AntiForgeryToken()
-                <button type="submit" class="btn btn-success fw-semibold"><i class="bi bi-send me-1"></i> Submit Request</button>
+                <button type="submit" class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-md shadow-emerald-600/20 transition-all hover:-translate-y-0.5">
+                    <i class="bi bi-send"></i> Submit Request
+                </button>
             </form>
         }
         
         @if (Model.Status == RequestStatus.Draft || Model.Status == RequestStatus.PendingApproval)
         {
-            <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#cancelModal"><i class="bi bi-x-circle me-1"></i> Cancel</button>
+            <button type="button" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-rose-700 bg-rose-50 border border-rose-200 rounded-xl hover:bg-rose-100 transition-colors" data-bs-toggle="modal" data-bs-target="#cancelModal">
+                <i class="bi bi-x-circle"></i> Cancel
+            </button>
         }
     </div>
 </div>
 
-<div class="row">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
     <!-- Left Column: Details & Items -->
-    <div class="col-md-8">
-        <div class="card card-custom mb-4">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-info-circle text-primary me-2"></i> Overview & Summary</span>
-                <span class="badge badge-status bg-@Model.Status.ToString().ToLower()">@Model.Status</span>
+    <div class="lg:col-span-8 space-y-6">
+        <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+            <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 font-bold text-slate-900 text-sm flex items-center gap-2">
+                <i class="bi bi-info-circle text-emerald-600"></i> Business Overview & Justification
             </div>
-            <div class="card-body">
-                <h5 class="fw-bold text-dark mb-2">@Model.Title</h5>
-                <p class="text-secondary bg-light p-3 rounded" style="white-space: pre-line;">@Model.Description</p>
+            <div class="p-6">
+                <h2 class="text-xl font-bold text-slate-900 mb-3">@Model.Title</h2>
+                <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 text-sm mb-6 leading-relaxed whitespace-pre-line">@Model.Description</div>
 
-                <div class="row text-muted small my-3">
-                    <div class="col-md-4">
-                        <strong class="text-dark d-block">Requester:</strong> @Model.RequesterName
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs text-slate-500 mb-6 p-4 bg-slate-50/50 rounded-xl border border-slate-100">
+                    <div>
+                        <strong class="text-slate-900 block mb-1">Requester:</strong> @Model.RequesterName
                     </div>
-                    <div class="col-md-4">
-                        <strong class="text-dark d-block">Department:</strong> @(Model.DepartmentName ?? "-")
+                    <div>
+                        <strong class="text-slate-900 block mb-1">Department:</strong> @(Model.DepartmentName ?? "-")
                     </div>
-                    <div class="col-md-4">
-                        <strong class="text-dark d-block">Priority:</strong>
-                        <span class="badge bg-@(Model.Priority == RequestPriority.High || Model.Priority == RequestPriority.Urgent ? "danger" : "secondary")">@Model.Priority</span>
+                    <div>
+                        <strong class="text-slate-900 block mb-1">Priority Level:</strong>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full font-bold bg-white text-slate-800 border border-slate-200 mt-0.5">@Model.Priority</span>
                     </div>
                 </div>
 
-                <div class="p-3 bg-primary bg-opacity-10 border border-primary border-opacity-25 rounded d-flex justify-content-between align-items-center">
-                    <span class="fw-bold text-primary">Total Request Value:</span>
-                    <span class="fs-4 fw-bold text-primary">@Model.TotalAmount.ToString("N2") @Model.Currency</span>
+                <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-between">
+                    <span class="font-semibold text-emerald-900 text-sm">Estimated Total Amount:</span>
+                    <span class="text-2xl font-bold text-emerald-700">@Model.TotalAmount.ToString("N2") @Model.Currency</span>
                 </div>
             </div>
         </div>
 
         <!-- Items Table -->
-        <div class="card card-custom mb-4">
-            <div class="card-header">
-                <i class="bi bi-list-ul text-primary me-2"></i> Request Line Items
+        <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+            <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 font-bold text-slate-900 text-sm flex items-center gap-2">
+                <i class="bi bi-list-ul text-emerald-600"></i> Request Line Items
             </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Item Description</th>
-                                <th>Quantity</th>
-                                <th>Unit Price</th>
-                                <th>Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if (Model.Items.Any())
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                            <th class="px-5 py-3.5">Item Description</th>
+                            <th class="px-5 py-3.5">Quantity</th>
+                            <th class="px-5 py-3.5">Unit Price</th>
+                            <th class="px-5 py-3.5 text-right">Total Price</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 text-xs">
+                        @if (Model.Items.Any())
+                        {
+                            foreach (var item in Model.Items)
                             {
-                                foreach (var item in Model.Items)
-                                {
-                                    <tr>
-                                        <td class="fw-semibold">@item.ItemName</td>
-                                        <td>@item.Quantity</td>
-                                        <td>@item.UnitPrice.ToString("N2") @Model.Currency</td>
-                                        <td class="fw-bold">@item.TotalPrice.ToString("N2") @Model.Currency</td>
-                                    </tr>
-                                }
-                            }
-                            else
-                            {
-                                <tr>
-                                    <td colspan="4" class="text-center py-3 text-muted">No line items specified.</td>
+                                <tr class="hover:bg-slate-50/80 transition-colors">
+                                    <td class="px-5 py-4 font-semibold text-slate-900">@item.ItemName</td>
+                                    <td class="px-5 py-4 text-slate-600">@item.Quantity</td>
+                                    <td class="px-5 py-4 text-slate-600">@item.UnitPrice.ToString("N2") <span class="text-[11px] text-slate-400">@Model.Currency</span></td>
+                                    <td class="px-5 py-4 font-bold text-slate-900 text-right">@item.TotalPrice.ToString("N2") <span class="text-[11px] text-slate-400">@Model.Currency</span></td>
                                 </tr>
                             }
-                        </tbody>
-                    </table>
-                </div>
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="4" class="px-5 py-8 text-center text-slate-500">No line items specified.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
             </div>
         </div>
 
         <!-- Comments Thread -->
-        <div class="card card-custom mb-4">
-            <div class="card-header">
-                <i class="bi bi-chat-left-text text-primary me-2"></i> Comments & History
+        <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+            <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 font-bold text-slate-900 text-sm flex items-center gap-2">
+                <i class="bi bi-chat-left-text text-emerald-600"></i> Comments & History
             </div>
-            <div class="card-body">
+            <div class="p-6">
                 @if (Model.Comments.Any())
                 {
-                    <div class="vstack gap-3 mb-4">
+                    <div class="space-y-3 mb-6">
                         @foreach (var c in Model.Comments.OrderBy(c => c.CreatedAtUtc))
                         {
-                            <div class="p-3 border rounded bg-light">
-                                <div class="d-flex justify-content-between mb-1">
-                                    <strong class="text-dark">@c.AuthorName</strong>
-                                    <small class="text-muted">@c.CreatedAtUtc.ToString("yyyy-MM-dd HH:mm")</small>
+                            <div class="p-4 border border-slate-200 rounded-xl bg-slate-50">
+                                <div class="flex justify-between items-center mb-1">
+                                    <strong class="text-slate-900 text-xs font-bold">@c.AuthorName</strong>
+                                    <span class="text-[11px] text-slate-400 font-mono">@c.CreatedAtUtc.ToString("yyyy-MM-dd HH:mm")</span>
                                 </div>
-                                <p class="m-0 text-secondary">@c.Content</p>
+                                <p class="text-xs text-slate-700 m-0">@c.Content</p>
                             </div>
                         }
                     </div>
                 }
                 else
                 {
-                    <p class="text-muted small mb-3">No comments posted yet.</p>
+                    <p class="text-xs text-slate-500 mb-4 italic">No comments posted yet.</p>
                 }
 
-                <form asp-action="AddComment" asp-route-id="@Model.Id" method="post">
+                <form asp-action="AddComment" asp-route-id="@Model.Id" method="post" class="space-y-3">
                     @Html.AntiForgeryToken()
-                    <div class="mb-2">
-                        <textarea name="content" class="form-control" rows="2" placeholder="Write a comment or note..." required></textarea>
+                    <div>
+                        <textarea name="content" class="w-full px-4 py-3 text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors bg-white" rows="2" placeholder="Write a comment or note..." required></textarea>
                     </div>
-                    <button type="submit" class="btn btn-sm btn-primary"><i class="bi bi-chat-right-text me-1"></i> Post Comment</button>
+                    <button type="submit" class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-xs transition-colors">
+                        <i class="bi bi-chat-right-text"></i> Post Comment
+                    </button>
                 </form>
             </div>
         </div>
     </div>
 
     <!-- Right Column: Status Summary -->
-    <div class="col-md-4">
-        <div class="card card-custom mb-4">
-            <div class="card-header">
-                <i class="bi bi-clock-history text-primary me-2"></i> Workflow Information
+    <div class="lg:col-span-4">
+        <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden sticky top-20">
+            <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 font-bold text-slate-900 text-sm flex items-center gap-2">
+                <i class="bi bi-clock-history text-emerald-600"></i> Workflow Timeline
             </div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <small class="text-muted d-block">Current Step:</small>
-                    <span class="fw-bold fs-5">Step @Model.CurrentStepNumber</span>
-                </div>
-                <div class="mb-3">
-                    <small class="text-muted d-block">Submitted At:</small>
-                    <span class="fw-semibold">@(Model.SubmittedAtUtc?.ToString("yyyy-MM-dd HH:mm") ?? "Not Submitted")</span>
+            <div class="p-6 space-y-4 text-xs">
+                <div>
+                    <span class="text-slate-400 font-semibold uppercase tracking-wider block mb-1">Current Workflow Step:</span>
+                    <span class="px-3 py-1.5 rounded-lg font-bold text-sm bg-emerald-50 text-emerald-700 border border-emerald-200 inline-block">Step @Model.CurrentStepNumber</span>
                 </div>
                 <div>
-                    <small class="text-muted d-block">Completed At:</small>
-                    <span class="fw-semibold">@(Model.CompletedAtUtc?.ToString("yyyy-MM-dd HH:mm") ?? "-")</span>
+                    <span class="text-slate-400 font-semibold uppercase tracking-wider block mb-1">Submitted Date:</span>
+                    <span class="font-semibold text-slate-800">@(Model.SubmittedAtUtc?.ToString("yyyy-MM-dd HH:mm") ?? "Not Submitted (Draft)")</span>
+                </div>
+                <div>
+                    <span class="text-slate-400 font-semibold uppercase tracking-wider block mb-1">Completion Date:</span>
+                    <span class="font-semibold text-slate-800">@(Model.CompletedAtUtc?.ToString("yyyy-MM-dd HH:mm") ?? "-")</span>
                 </div>
             </div>
         </div>
@@ -162,24 +170,24 @@
 
 <!-- Cancel Request Modal -->
 <div class="modal fade" id="cancelModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-2xl border-0 shadow-xl overflow-hidden">
             <form asp-action="Cancel" asp-route-id="@Model.Id" method="post">
                 @Html.AntiForgeryToken()
-                <div class="modal-header">
-                    <h5 class="modal-title fw-bold text-danger">Cancel Request</h5>
+                <div class="modal-header bg-slate-50 border-b border-slate-200 px-6 py-4">
+                    <h5 class="modal-title text-base font-bold text-rose-700 flex items-center gap-2"><i class="bi bi-exclamation-triangle"></i> Cancel Request</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
-                    <p class="text-muted">Are you sure you want to cancel this request? This action cannot be undone.</p>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Cancellation Reason</label>
-                        <textarea name="reason" class="form-control" rows="3" required placeholder="State reason for cancellation..."></textarea>
+                <div class="modal-body p-6 space-y-4">
+                    <p class="text-xs text-slate-500">Are you sure you want to cancel this request? This action cannot be undone.</p>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Cancellation Reason</label>
+                        <textarea name="reason" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 text-sm text-slate-900 bg-white" rows="3" required placeholder="State reason for cancellation..."></textarea>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-danger">Confirm Cancellation</button>
+                <div class="modal-footer bg-slate-50 border-t border-slate-200 px-6 py-3.5 flex justify-end gap-3">
+                    <button type="button" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 rounded-xl" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="px-5 py-2 text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-xs transition-all">Confirm Cancellation</button>
                 </div>
             </form>
         </div>

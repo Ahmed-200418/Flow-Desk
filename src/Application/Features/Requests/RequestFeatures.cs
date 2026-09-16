@@ -555,3 +555,25 @@ public class UploadAttachmentCommandHandler : IRequestHandler<UploadAttachmentCo
         return new AttachmentDto(attachment.Id, attachment.FileName, attachment.ContentType, attachment.FileSizeBytes, attachment.UploadedByUserId, uploader.FullName, attachment.UploadedAtUtc);
     }
 }
+
+// Delete Request Command (for Drafts or Admin)
+public record DeleteRequestCommand(Guid RequestId) : IRequest;
+
+public class DeleteRequestCommandHandler : IRequestHandler<DeleteRequestCommand>
+{
+    private readonly IApplicationDbContext _context;
+
+    public DeleteRequestCommandHandler(IApplicationDbContext context)
+    {
+        _context = context;
+    }
+
+    public async Task Handle(DeleteRequestCommand request, CancellationToken cancellationToken)
+    {
+        var req = await _context.Requests.FirstOrDefaultAsync(r => r.Id == request.RequestId, cancellationToken);
+        if (req == null) throw new NotFoundException(nameof(Request), request.RequestId);
+
+        _context.Requests.Remove(req);
+        await _context.SaveChangesAsync(cancellationToken);
+    }
+}

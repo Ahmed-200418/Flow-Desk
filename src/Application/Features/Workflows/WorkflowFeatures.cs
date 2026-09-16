@@ -640,3 +640,27 @@ public class RemoveStepConditionCommandHandler : IRequestHandler<RemoveStepCondi
         await _context.SaveChangesAsync(cancellationToken);
     }
 }
+
+// -----------------------------------------------------------------------------
+// 12. DELETE WORKFLOW
+// -----------------------------------------------------------------------------
+public record DeleteWorkflowCommand(Guid WorkflowId) : IRequest;
+
+public class DeleteWorkflowCommandHandler : IRequestHandler<DeleteWorkflowCommand>
+{
+    private readonly IApplicationDbContext _context;
+
+    public DeleteWorkflowCommandHandler(IApplicationDbContext context)
+    {
+        _context = context;
+    }
+
+    public async Task Handle(DeleteWorkflowCommand request, CancellationToken cancellationToken)
+    {
+        var wf = await _context.Workflows.FirstOrDefaultAsync(w => w.Id == request.WorkflowId, cancellationToken);
+        if (wf == null) throw new NotFoundException(nameof(Workflow), request.WorkflowId);
+
+        _context.Workflows.Remove(wf);
+        await _context.SaveChangesAsync(cancellationToken);
+    }
+}

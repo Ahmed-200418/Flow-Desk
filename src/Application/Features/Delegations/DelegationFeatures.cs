@@ -352,3 +352,75 @@ public class GetAllDelegationsQueryHandler : IRequestHandler<GetAllDelegationsQu
         return await PaginatedList<DelegationDto>.CreateAsync(dtoQuery, request.PageNumber, request.PageSize, cancellationToken);
     }
 }
+
+// Get Delegation By Id Query
+public record GetDelegationByIdQuery(Guid Id) : IRequest<DelegationDto>;
+
+public class GetDelegationByIdQueryHandler : IRequestHandler<GetDelegationByIdQuery, DelegationDto>
+{
+    private readonly IApplicationDbContext _context;
+
+    public GetDelegationByIdQueryHandler(IApplicationDbContext context)
+    {
+        _context = context;
+    }
+
+    public async Task<DelegationDto> Handle(GetDelegationByIdQuery request, CancellationToken cancellationToken)
+    {
+        var d = await _context.Delegations
+            .AsNoTracking()
+            .Include(d => d.DelegatorUser)
+            .Include(d => d.DelegateeUser)
+            .Include(d => d.RequestType)
+            .FirstOrDefaultAsync(d => d.Id == request.Id, cancellationToken);
+
+        if (d == null) throw new NotFoundException(nameof(Delegation), request.Id);
+
+        return new DelegationDto(
+            d.Id,
+            d.DelegatorUserId,
+            d.DelegatorUser.FullName,
+            d.DelegatorUser.Email,
+            d.DelegateeUserId,
+            d.DelegateeUser.FullName,
+            d.DelegateeUser.Email,
+            d.StartDateUtc,
+            d.EndDateUtc,
+            d.RequestTypeId,
+            d.RequestType != null ? d.RequestType.Name : null,
+            d.IsActive && d.EndDateUtc > DateTime.UtcNow,
+            d.Reason,
+            d.CreatedAtUtc
+        );
+    }
+}
+
+// Update Delegation Command
+public record UpdateDelegationCommand(Guid Id, DateTime StartDateUtc, DateTime EndDateUtc, string Reason) : IRequest;
+
+public class UpdateDelegationCommandHandler : IRequestHandler<UpdateDelegationCommand>
+{
+    private readonly IApplicationDbContext _context;
+
+    public UpdateDelegationCommandHandler(IApplicationDbContext context)
+    {
+        _context = context;
+    }
+
+    public async Task Handle(UpdateDelegationCommand request, CancellationToken cancellationToken)
+    {
+        var d = await _context.Delegations.FirstOrDefaultAsync(d => d.Id == request.Id, cancellationToken);
+        if (d == null) throw new NotFoundException(nameof(Delegation), request.Id);
+
+        var startProp = typeof(Delegation).GetProperty(nameof(Delegation.StartDateUtc));
+        startProp?.SetValue(d, request.StartDateUtc);
+
+        var endProp = typeof(Delegation).GetProperty(nameof(Delegation.EndDateUtc));
+        endProp?.SetValue(d, request.EndDateUtc);
+
+        var reasonProp = typeof(Delegation).GetProperty(nameof(Delegation.Reason));
+        reasonProp?.SetValue(d, request.Reason);
+
+        await _context.SaveChangesAsync(cancellationToken);
+    }
+}

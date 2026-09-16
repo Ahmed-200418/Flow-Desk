@@ -1,0 +1,51 @@
+@model FlowDesk.Application.Features.Departments.DepartmentDto
+@{
+    ViewData["Title"] = "Department Details";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+    <div>
+        <h4 class="fw-bold text-dark m-0">@Model.Name</h4>
+        <span class="badge bg-light text-dark border fw-bold">Code: @Model.Code</span>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary-custom"><i class="bi bi-pencil me-1"></i> Edit</a>
+        <a asp-action="Index" asp-route-organizationId="@Model.OrganizationId" class="btn btn-light border"><i class="bi bi-arrow-left me-1"></i> Back</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card card-custom mb-4">
+            <div class="card-header fw-bold">Department Information</div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4 text-muted">Department Name</dt>
+                    <dd class="col-sm-8 fw-semibold text-dark">@Model.Name</dd>
+
+                    <dt class="col-sm-4 text-muted">Code</dt>
+                    <dd class="col-sm-8"><span class="badge bg-dark">@Model.Code</span></dd>
+
+                    <dt class="col-sm-4 text-muted">Parent Department</dt>
+                    <dd class="col-sm-8">@(Model.ParentDepartmentName ?? "None (Top Level)")</dd>
+
+                    <dt class="col-sm-4 text-muted">Manager</dt>
+                    <dd class="col-sm-8">@(Model.ManagerUserName ?? "Not Assigned")</dd>
+
+                    <dt class="col-sm-4 text-muted">Created Date</dt>
+                    <dd class="col-sm-8">@Model.CreatedAtUtc.ToString("F")</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-custom">
+            <div class="card-header fw-bold">Quick Actions</div>
+            <div class="card-body">
+                <a asp-controller="Positions" asp-action="Index" asp-route-departmentId="@Model.Id" class="btn btn-outline-primary w-100 mb-2">
+                    <i class="bi bi-briefcase me-2"></i> View Positions
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

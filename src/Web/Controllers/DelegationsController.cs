@@ -87,4 +87,38 @@ public class DelegationsController : Controller
 
         return RedirectToAction(nameof(Index));
     }
+
+    [HttpGet]
+    public async Task<IActionResult> Edit(Guid id)
+    {
+        ViewData["Title"] = "Edit Delegation";
+        try
+        {
+            var delegation = await _mediator.Send(new GetDelegationByIdQuery(id));
+            return View(delegation);
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = ex.Message;
+            return RedirectToAction(nameof(Index));
+        }
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(Guid id, DateTime startDateUtc, DateTime endDateUtc, string reason)
+    {
+        try
+        {
+            await _mediator.Send(new UpdateDelegationCommand(id, startDateUtc, endDateUtc, reason));
+            TempData["Success"] = "Delegation updated successfully.";
+            return RedirectToAction(nameof(Index));
+        }
+        catch (Exception ex)
+        {
+            ModelState.AddModelError(string.Empty, ex.Message);
+            var delegation = await _mediator.Send(new GetDelegationByIdQuery(id));
+            return View(delegation);
+        }
+    }
 }

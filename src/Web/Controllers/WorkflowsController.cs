@@ -217,4 +217,21 @@ public class WorkflowsController : Controller
 
         return RedirectToAction(nameof(Builder), new { id = workflowId, versionId = workflowVersionId });
     }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        try
+        {
+            await _mediator.Send(new DeleteWorkflowCommand(id));
+            TempData["Success"] = "Workflow deleted successfully.";
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = ex.Message;
+        }
+
+        return RedirectToAction(nameof(Index));
+    }
 }

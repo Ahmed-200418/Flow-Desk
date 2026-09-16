@@ -1,15 +1,17 @@
 @model FlowDesk.Application.Features.Performance.PerformanceMetricsDto
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
     <div>
-        <h3 class="fw-bold text-dark mb-1"><i class="bi bi-lightning-charge text-warning me-2"></i> Redis & Performance Optimization</h3>
-        <p class="text-muted mb-0">Distributed caching metrics, database query indexing, memory telemetry, and live benchmark suite.</p>
+        <h1 class="text-2xl font-bold text-slate-900 flex items-center gap-2">
+            <i class="bi bi-lightning-charge text-amber-500"></i> Redis & Performance Optimization
+        </h1>
+        <p class="text-sm text-slate-500 mt-1">Distributed caching metrics, database query indexing, memory telemetry, and live benchmark suite.</p>
     </div>
-    <div class="d-flex gap-2">
-        <form method="post" asp-action="Clear" class="d-inline">
+    <div class="flex gap-2">
+        <form method="post" asp-action="Clear" class="inline">
             <input type="hidden" name="clearAll" value="true" />
-            <button type="submit" class="btn btn-outline-danger" onclick="return confirm('Are you sure you want to flush all cached entries?');">
-                <i class="bi bi-trash3 me-1"></i> Flush All Cache
+            <button type="submit" class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-rose-700 bg-rose-50 border border-rose-200 rounded-lg hover:bg-rose-100 transition-colors" onclick="return confirm('Are you sure you want to flush all cached entries?');">
+                <i class="bi bi-trash3"></i> Flush All Cache
             </button>
         </form>
     </div>
@@ -17,128 +19,120 @@
 
 @if (TempData["Benchmark"] != null)
 {
-    <div class="alert alert-info alert-dismissible fade show shadow-sm mb-4" role="alert">
-        <i class="bi bi-speedometer me-2"></i> <strong>Benchmark Results:</strong> @TempData["Benchmark"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    <div class="p-4 bg-sky-50 border border-sky-200 rounded-xl text-xs text-sky-800 shadow-sm mb-6 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+            <i class="bi bi-speedometer text-lg text-sky-600"></i>
+            <span><strong>Benchmark Results:</strong> @TempData["Benchmark"]</span>
+        </div>
     </div>
 }
 
 <!-- Telemetry & Status Cards -->
-<div class="row g-3 mb-4">
-    <div class="col-md-3">
-        <div class="card card-custom h-100 p-3">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <div class="text-muted small fw-semibold">CACHE ENGINE</div>
-                    <div class="fw-bold text-success fs-6 text-truncate mt-1" style="max-width: 150px;">
-                        <i class="bi bi-hdd-network me-1"></i> @Model.CacheStats.EngineStatus
-                    </div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+        <div class="flex items-center justify-between">
+            <div>
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">CACHE ENGINE</span>
+                <div class="text-base font-bold text-emerald-600 truncate mt-1 max-w-[150px]" title="@Model.CacheStats.EngineStatus">
+                    <i class="bi bi-hdd-network me-1"></i> @Model.CacheStats.EngineStatus
                 </div>
-                <div class="bg-success-subtle text-success p-3 rounded-3">
-                    <i class="bi bi-cpu fs-4"></i>
-                </div>
+            </div>
+            <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
+                <i class="bi bi-cpu text-xl"></i>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card card-custom h-100 p-3">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <div class="text-muted small fw-semibold">CACHE HIT RATE</div>
-                    <div class="fs-3 fw-bold text-primary">@Model.CacheStats.HitRatePercentage.ToString("F1")%</div>
-                    <small class="text-muted">@Model.CacheStats.HitCount hits / @Model.CacheStats.MissCount misses</small>
-                </div>
-                <div class="bg-primary-subtle text-primary p-3 rounded-3">
-                    <i class="bi bi-bullseye fs-4"></i>
-                </div>
+    <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+        <div class="flex items-center justify-between">
+            <div>
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">CACHE HIT RATE</span>
+                <div class="text-2xl font-bold text-emerald-700 mt-1">@Model.CacheStats.HitRatePercentage.ToString("F1")%</div>
+                <span class="text-xs text-slate-400">@Model.CacheStats.HitCount hits / @Model.CacheStats.MissCount misses</span>
+            </div>
+            <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
+                <i class="bi bi-bullseye text-xl"></i>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card card-custom h-100 p-3">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <div class="text-muted small fw-semibold">ACTIVE CACHED KEYS</div>
-                    <div class="fs-3 fw-bold text-warning">@Model.CacheStats.TotalKeys</div>
-                    <small class="text-muted">@Model.CacheStats.InvalidationCount evicted</small>
-                </div>
-                <div class="bg-warning-subtle text-warning p-3 rounded-3">
-                    <i class="bi bi-key fs-4"></i>
-                </div>
+    <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+        <div class="flex items-center justify-between">
+            <div>
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">ACTIVE CACHED KEYS</span>
+                <div class="text-2xl font-bold text-amber-600 mt-1">@Model.CacheStats.TotalKeys</div>
+                <span class="text-xs text-slate-400">@Model.CacheStats.InvalidationCount evicted</span>
+            </div>
+            <div class="p-3 bg-amber-50 text-amber-600 rounded-xl">
+                <i class="bi bi-key text-xl"></i>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card card-custom h-100 p-3">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <div class="text-muted small fw-semibold">PROCESS WORKING SET</div>
-                    <div class="fs-3 fw-bold text-info">@Model.EstimatedMemoryUsageMb.ToString("F1") MB</div>
-                    <small class="text-muted">@Model.DatabaseProvider</small>
-                </div>
-                <div class="bg-info-subtle text-info p-3 rounded-3">
-                    <i class="bi bi-memory fs-4"></i>
-                </div>
+    <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+        <div class="flex items-center justify-between">
+            <div>
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">PROCESS WORKING SET</span>
+                <div class="text-2xl font-bold text-sky-700 mt-1">@Model.EstimatedMemoryUsageMb.ToString("F1") MB</div>
+                <span class="text-xs text-slate-400">@Model.DatabaseProvider</span>
+            </div>
+            <div class="p-3 bg-sky-50 text-sky-600 rounded-xl">
+                <i class="bi bi-memory text-xl"></i>
             </div>
         </div>
     </div>
 </div>
 
-<div class="row g-4">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
     <!-- Live Benchmark Suite -->
-    <div class="col-lg-6">
-        <div class="card card-custom h-100">
-            <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-speedometer2 me-2"></i> Latency Benchmark Suite</span>
-                <span class="badge bg-primary">Live Profiler</span>
-            </div>
-            <div class="card-body">
-                <p class="text-muted small">
-                    Runs comparative execution tests comparing direct SQL Server database query execution time vs Redis/Distributed Cache retrieval speed.
-                </p>
-                <form method="post" asp-action="Benchmark">
-                    @Html.AntiForgeryToken()
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold small">Sample Query Iterations</label>
-                        <select name="iterations" class="form-select">
-                            <option value="25">25 Iteration Sample Test</option>
-                            <option value="50" selected>50 Iteration Standard Test</option>
-                            <option value="100">100 Iteration Stress Test</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100">
-                        <i class="bi bi-play-fill me-1"></i> Execute Benchmark Suite
-                    </button>
-                </form>
-            </div>
+    <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col">
+        <div class="px-5 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+            <span class="font-semibold text-slate-800 flex items-center gap-2"><i class="bi bi-speedometer2 text-emerald-600"></i> Latency Benchmark Suite</span>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">Live Profiler</span>
+        </div>
+        <div class="p-5 flex-1 flex flex-col justify-between">
+            <p class="text-xs text-slate-500 mb-4">
+                Runs comparative execution tests comparing direct SQL Server database query execution time vs Redis/Distributed Cache retrieval speed.
+            </p>
+            <form method="post" asp-action="Benchmark" class="space-y-4">
+                @Html.AntiForgeryToken()
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Sample Query Iterations</label>
+                    <select name="iterations" class="block w-full px-3 py-2 text-xs text-slate-900 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors">
+                        <option value="25">25 Iteration Sample Test</option>
+                        <option value="50" selected>50 Iteration Standard Test</option>
+                        <option value="100">100 Iteration Stress Test</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2.5 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-sm transition-colors">
+                    <i class="bi bi-play-fill"></i> Execute Benchmark Suite
+                </button>
+            </form>
         </div>
     </div>
 
     <!-- Manual Cache Eviction -->
-    <div class="col-lg-6">
-        <div class="card card-custom h-100">
-            <div class="card-header bg-light">
-                <i class="bi bi-funnel me-2"></i> Cache Invalidation Controls
-            </div>
-            <div class="card-body">
-                <p class="text-muted small">
-                    Invalidate specific cache entries or purge key patterns when workflow definitions, permissions, or system metadata change.
-                </p>
-                <form method="post" asp-action="Clear" class="mb-3">
+    <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col">
+        <div class="px-5 py-4 bg-slate-50 border-b border-slate-200 font-semibold text-slate-800 flex items-center gap-2">
+            <i class="bi bi-funnel text-emerald-600"></i> Cache Invalidation Controls
+        </div>
+        <div class="p-5 flex-1 flex flex-col justify-between">
+            <p class="text-xs text-slate-500 mb-4">
+                Invalidate specific cache entries or purge key patterns when workflow definitions, permissions, or system metadata change.
+            </p>
+            <div class="space-y-3">
+                <form method="post" asp-action="Clear">
                     @Html.AntiForgeryToken()
-                    <div class="input-group">
-                        <input type="text" name="prefix" class="form-control" placeholder="Prefix pattern (e.g. Workflow_, User_)..." />
-                        <button type="submit" class="btn btn-outline-warning">
-                            <i class="bi bi-eraser me-1"></i> Evict by Prefix
+                    <div class="flex rounded-lg shadow-sm">
+                        <input type="text" name="prefix" class="block w-full px-3 py-2 text-xs text-slate-900 bg-white border border-slate-200 rounded-l-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors" placeholder="Prefix pattern (e.g. Workflow_, User_)..." />
+                        <button type="submit" class="inline-flex items-center gap-1 px-3 py-2 text-xs font-semibold text-amber-700 bg-amber-50 border border-l-0 border-amber-200 rounded-r-lg hover:bg-amber-100 transition-colors whitespace-nowrap">
+                            <i class="bi bi-eraser"></i> Evict Prefix
                         </button>
                     </div>
                 </form>
                 <form method="post" asp-action="Clear">
                     @Html.AntiForgeryToken()
-                    <div class="input-group">
-                        <input type="text" name="key" class="form-control" placeholder="Exact Cache Key (e.g. RequestTypes_All)..." />
-                        <button type="submit" class="btn btn-outline-secondary">
-                            <i class="bi bi-x-circle me-1"></i> Remove Key
+                    <div class="flex rounded-lg shadow-sm">
+                        <input type="text" name="key" class="block w-full px-3 py-2 text-xs text-slate-900 bg-white border border-slate-200 rounded-l-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors" placeholder="Exact Cache Key (e.g. RequestTypes_All)..." />
+                        <button type="submit" class="inline-flex items-center gap-1 px-3 py-2 text-xs font-semibold text-slate-700 bg-slate-50 border border-l-0 border-slate-200 rounded-r-lg hover:bg-slate-100 transition-colors whitespace-nowrap">
+                            <i class="bi bi-x-circle"></i> Remove Key
                         </button>
                     </div>
                 </form>
@@ -148,54 +142,53 @@
 </div>
 
 <!-- Database Indexes & Health Status -->
-<div class="card card-custom mt-4">
-    <div class="card-header bg-light">
-        <i class="bi bi-database-gear me-2"></i> Configured Database Indexes & Query Optimizations
+<div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+    <div class="px-5 py-4 bg-slate-50 border-b border-slate-200 font-semibold text-slate-800 flex items-center gap-2">
+        <i class="bi bi-database-gear text-emerald-600"></i> Configured Database Indexes & Query Optimizations
     </div>
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-sm table-hover align-middle mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th>Target Entity</th>
-                        <th>Indexed Columns</th>
-                        <th>Optimization Objective</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td class="fw-bold">Requests</td>
-                        <td><span class="font-monospace small">Status, RequesterUserId</span></td>
-                        <td>Optimizes Employee Dashboard & "My Requests" filter queries</td>
-                        <td><span class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Active Index</span></td>
-                    </tr>
-                    <tr>
-                        <td class="fw-bold">Requests</td>
-                        <td><span class="font-monospace small">DepartmentId, CreatedAtUtc</span></td>
-                        <td>Accelerates Manager & Admin department aggregation reports</td>
-                        <td><span class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Active Index</span></td>
-                    </tr>
-                    <tr>
-                        <td class="fw-bold">ApprovalInstances</td>
-                        <td><span class="font-monospace small">ApproverUserId, Status</span></td>
-                        <td>Optimizes Manager Pending Approvals Inbox lookups</td>
-                        <td><span class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Active Index</span></td>
-                    </tr>
-                    <tr>
-                        <td class="fw-bold">Workflows</td>
-                        <td><span class="font-monospace small">RequestTypeId, IsPublished, IsActive</span></td>
-                        <td>Fast resolution of active workflow definitions during submission</td>
-                        <td><span class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Active Index</span></td>
-                    </tr>
-                    <tr>
-                        <td class="fw-bold">AuditLogs</td>
-                        <td><span class="font-monospace small">EntityName, EntityId</span></td>
-                        <td>Accelerates entity history timeline queries</td>
-                        <td><span class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Active Index</span></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                    <th class="px-5 py-3">Target Entity</th>
+                    <th class="px-5 py-3">Indexed Columns</th>
+                    <th class="px-5 py-3">Optimization Objective</th>
+                    <th class="px-5 py-3">Status</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-xs">
+                <tr class="hover:bg-slate-50/80 transition-colors">
+                    <td class="px-5 py-3 font-bold text-slate-900">Requests</td>
+                    <td class="px-5 py-3"><span class="font-mono text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded">Status, RequesterUserId</span></td>
+                    <td class="px-5 py-3 text-slate-600">Optimizes Employee Dashboard & "My Requests" filter queries</td>
+                    <td class="px-5 py-3"><span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-800"><i class="bi bi-check-circle"></i> Active Index</span></td>
+                </tr>
+                <tr class="hover:bg-slate-50/80 transition-colors">
+                    <td class="px-5 py-3 font-bold text-slate-900">Requests</td>
+                    <td class="px-5 py-3"><span class="font-mono text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded">DepartmentId, CreatedAtUtc</span></td>
+                    <td class="px-5 py-3 text-slate-600">Accelerates Manager & Admin department aggregation reports</td>
+                    <td class="px-5 py-3"><span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-800"><i class="bi bi-check-circle"></i> Active Index</span></td>
+                </tr>
+                <tr class="hover:bg-slate-50/80 transition-colors">
+                    <td class="px-5 py-3 font-bold text-slate-900">ApprovalInstances</td>
+                    <td class="px-5 py-3"><span class="font-mono text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded">ApproverUserId, Status</span></td>
+                    <td class="px-5 py-3 text-slate-600">Optimizes Manager Pending Approvals Inbox lookups</td>
+                    <td class="px-5 py-3"><span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-800"><i class="bi bi-check-circle"></i> Active Index</span></td>
+                </tr>
+                <tr class="hover:bg-slate-50/80 transition-colors">
+                    <td class="px-5 py-3 font-bold text-slate-900">Workflows</td>
+                    <td class="px-5 py-3"><span class="font-mono text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded">RequestTypeId, IsPublished, IsActive</span></td>
+                    <td class="px-5 py-3 text-slate-600">Fast resolution of active workflow definitions during submission</td>
+                    <td class="px-5 py-3"><span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-800"><i class="bi bi-check-circle"></i> Active Index</span></td>
+                </tr>
+                <tr class="hover:bg-slate-50/80 transition-colors">
+                    <td class="px-5 py-3 font-bold text-slate-900">AuditLogs</td>
+                    <td class="px-5 py-3"><span class="font-mono text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded">EntityName, EntityId</span></td>
+                    <td class="px-5 py-3 text-slate-600">Accelerates entity history timeline queries</td>
+                    <td class="px-5 py-3"><span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-800"><i class="bi bi-check-circle"></i> Active Index</span></td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 </div>
+

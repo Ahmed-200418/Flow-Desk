@@ -62,4 +62,71 @@ public class RequestTypesController : Controller
             return View();
         }
     }
+
+    [HttpGet]
+    public async Task<IActionResult> Details(Guid id)
+    {
+        ViewData["Title"] = "Request Type Details";
+        try
+        {
+            var rt = await _mediator.Send(new GetRequestTypeByIdQuery(id));
+            return View(rt);
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = ex.Message;
+            return RedirectToAction(nameof(Index));
+        }
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Edit(Guid id)
+    {
+        ViewData["Title"] = "Edit Request Type";
+        try
+        {
+            var rt = await _mediator.Send(new GetRequestTypeByIdQuery(id));
+            return View(rt);
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = ex.Message;
+            return RedirectToAction(nameof(Index));
+        }
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(Guid id, string name, string description, string? icon, bool isActive = true)
+    {
+        try
+        {
+            await _mediator.Send(new UpdateRequestTypeCommand(id, name, description, icon, isActive));
+            TempData["Success"] = "Request Type updated successfully.";
+            return RedirectToAction(nameof(Index));
+        }
+        catch (Exception ex)
+        {
+            ModelState.AddModelError(string.Empty, ex.Message);
+            var rt = await _mediator.Send(new GetRequestTypeByIdQuery(id));
+            return View(rt);
+        }
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        try
+        {
+            await _mediator.Send(new DeleteRequestTypeCommand(id));
+            TempData["Success"] = "Request Type deleted successfully.";
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = ex.Message;
+        }
+
+        return RedirectToAction(nameof(Index));
+    }
 }

@@ -212,3 +212,121 @@ public class GetDepartmentsQueryHandler : IRequestHandler<GetDepartmentsQuery, L
             .ToListAsync(cancellationToken);
     }
 }
+
+// Get Department By Id Query
+public record GetDepartmentByIdQuery(Guid Id) : IRequest<DepartmentDto>;
+
+public class GetDepartmentByIdQueryHandler : IRequestHandler<GetDepartmentByIdQuery, DepartmentDto>
+{
+    private readonly IApplicationDbContext _context;
+
+    public GetDepartmentByIdQueryHandler(IApplicationDbContext context)
+    {
+        _context = context;
+    }
+
+    public async Task<DepartmentDto> Handle(GetDepartmentByIdQuery request, CancellationToken cancellationToken)
+    {
+        var dept = await _context.Departments
+            .AsNoTracking()
+            .Include(d => d.ParentDepartment)
+            .Include(d => d.ManagerUser)
+            .FirstOrDefaultAsync(d => d.Id == request.Id, cancellationToken);
+
+        if (dept == null) throw new NotFoundException(nameof(Department), request.Id);
+
+        return new DepartmentDto(
+            dept.Id,
+            dept.OrganizationId,
+            dept.Name,
+            dept.Code,
+            dept.ParentDepartmentId,
+            dept.ParentDepartment?.Name,
+            dept.ManagerUserId,
+            dept.ManagerUser?.FullName,
+            dept.CreatedAtUtc);
+    }
+}
+
+// Update Department Command
+public record UpdateDepartmentCommand(
+    Guid Id,
+    string Name,
+    Guid? ParentDepartmentId = null,
+    Guid? ManagerUserId = null
+) : IRequest<DepartmentDto>;
+
+public class UpdateDepartmentCommandHandler : IRequestHandler<UpdateDepartmentCommand, DepartmentDto>
+{
+    private readonly IApplicationDbContext _context;
+
+    public UpdateDepartmentCommandHandler(IApplicationDbContext context)
+    {
+        _context = context;
+    }
+
+    public async Task<DepartmentDto> Handle(UpdateDepartmentCommand request, CancellationToken cancellationToken)
+    {
+        var dept = await _context.Departments.FirstOrDefaultAsync(d => d.Id == request.Id, cancellationToken);
+        if (dept == null) throw new NotFoundException(nameof(Department), request.Id);
+
+        if (request.ParentDepartmentId.HasValue && request.ParentDepartmentId.Value != dept.Id)
+        {
+            var parentExists = await _context.Departments.AnyAsync(d => d.Id == request.ParentDepartmentId.Value, cancellationToken);
+            if (!parentExists) throw new NotFoundException("Parent Department not found.");
+            var parentProp = typeof(Department).GetProperty(nameof(Department.ParentDepartmentId));
+            parentProp?.SetValue(dept, request.ParentDepartmentId);
+        }
+        else if (!request.ParentDepartmentId.HasValue)
+        {
+            var parentProp = typeof(Department).GetProperty(nameof(Department.ParentDepartmentId));
+            parentProp?.SetValue(dept, (Guid?)null);
+        }
+
+        var nameProp = typeof(Department).GetProperty(nameof(Department.Name));
+        nameProp?.SetValue(dept, request.Name.Trim());
+
+        var mgrProp = typeof(Department).GetProperty(nameof(Department.ManagerUserId));
+        mgrProp?.SetValue(dept, request.ManagerUserId);
+
+        await _context.SaveChangesAsync(cancellationToken);
+
+        var updated = await _context.Departments
+            .Include(d => d.ParentDepartment)
+            .Include(d => d.ManagerUser)
+            .FirstAsync(d => d.Id == dept.Id, cancellationToken);
+
+        return new DepartmentDto(
+            updated.Id,
+            updated.OrganizationId,
+            updated.Name,
+            updated.Code,
+            updated.ParentDepartmentId,
+            updated.ParentDepartment?.Name,
+            updated.ManagerUserId,
+            updated.ManagerUser?.FullName,
+            updated.CreatedAtUtc);
+    }
+}
+
+// Delete Department Command
+public record DeleteDepartmentCommand(Guid Id) : IRequest;
+
+public class DeleteDepartmentCommandHandler : IRequestHandler<DeleteDepartmentCommand>
+{
+    private readonly IApplicationDbContext _context;
+
+    public DeleteDepartmentCommandHandler(IApplicationDbContext context)
+    {
+        _context = context;
+    }
+
+    public async Task Handle(DeleteDepartmentCommand request, CancellationToken cancellationToken)
+    {
+        var dept = await _context.Departments.FirstOrDefaultAsync(d => d.Id == request.Id, cancellationToken);
+        if (dept == null) throw new NotFoundException(nameof(Department), request.Id);
+
+        _context.Departments.Remove(dept);
+        await _context.SaveChangesAsync(cancellationToken);
+    }
+}

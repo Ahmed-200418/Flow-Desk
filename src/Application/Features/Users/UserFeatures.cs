@@ -255,3 +255,83 @@ public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdQuery, UserDet
         return await CreateUserCommandHandler.GetUserDetailAsync(request.Id, _context, cancellationToken);
     }
 }
+
+// Update User Command
+public record UpdateUserCommand(
+    Guid Id,
+    string FirstName,
+    string LastName,
+    string? JobTitle,
+    Guid? DepartmentId,
+    Guid? PositionId,
+    List<Guid>? RoleIds = null
+) : IRequest<UserDetailDto>;
+
+public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, UserDetailDto>
+{
+    private readonly IApplicationDbContext _context;
+
+    public UpdateUserCommandHandler(IApplicationDbContext context)
+    {
+        _context = context;
+    }
+
+    public async Task<UserDetailDto> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
+    {
+        var user = await _context.Users.Include(u => u.UserRoles).FirstOrDefaultAsync(u => u.Id == request.Id, cancellationToken);
+        if (user == null) throw new NotFoundException(nameof(User), request.Id);
+
+        var fnProp = typeof(User).GetProperty(nameof(User.FirstName));
+        fnProp?.SetValue(user, request.FirstName.Trim());
+
+        var lnProp = typeof(User).GetProperty(nameof(User.LastName));
+        lnProp?.SetValue(user, request.LastName.Trim());
+
+        var jtProp = typeof(User).GetProperty(nameof(User.JobTitle));
+        jtProp?.SetValue(user, request.JobTitle?.Trim());
+
+        var deptProp = typeof(User).GetProperty(nameof(User.DepartmentId));
+        deptProp?.SetValue(user, request.DepartmentId);
+
+        var posProp = typeof(User).GetProperty(nameof(User.PositionId));
+        posProp?.SetValue(user, request.PositionId);
+
+        if (request.RoleIds != null)
+        {
+            _context.UserRoles.RemoveRange(user.UserRoles);
+            var validRoleIds = await _context.Roles.Where(r => request.RoleIds.Contains(r.Id)).Select(r => r.Id).ToListAsync(cancellationToken);
+            foreach (var roleId in validRoleIds)
+            {
+                _context.UserRoles.Add(new UserRole { UserId = user.Id, RoleId = roleId });
+            }
+        }
+
+        await _context.SaveChangesAsync(cancellationToken);
+
+        return await CreateUserCommandHandler.GetUserDetailAsync(user.Id, _context, cancellationToken);
+    }
+}
+
+// Toggle User Status / Delete Command
+public record ToggleUserStatusCommand(Guid Id) : IRequest;
+
+public class ToggleUserStatusCommandHandler : IRequestHandler<ToggleUserStatusCommand>
+{
+    private readonly IApplicationDbContext _context;
+
+    public ToggleUserStatusCommandHandler(IApplicationDbContext context)
+    {
+        _context = context;
+    }
+
+    public async Task Handle(ToggleUserStatusCommand request, CancellationToken cancellationToken)
+    {
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == request.Id, cancellationToken);
+        if (user == null) throw new NotFoundException(nameof(User), request.Id);
+
+        var activeProp = typeof(User).GetProperty(nameof(User.IsActive));
+        activeProp?.SetValue(user, !user.IsActive);
+
+        await _context.SaveChangesAsync(cancellationToken);
+    }
+}

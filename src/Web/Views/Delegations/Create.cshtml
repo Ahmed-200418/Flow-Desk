@@ -2,67 +2,76 @@
 @using FlowDesk.Application.Features.RequestTypes
 
 @{
+    ViewData["Title"] = "Create Delegation";
     var users = ViewBag.Users as IEnumerable<UserSummaryDto> ?? new List<UserSummaryDto>();
     var requestTypes = ViewBag.RequestTypes as IEnumerable<RequestTypeDto> ?? new List<RequestTypeDto>();
 }
 
-<div class="row justify-content-center">
-    <div class="col-lg-8">
-        <div class="card card-custom">
-            <div class="card-header bg-white d-flex align-items-center justify-content-between">
-                <h5 class="m-0 fw-bold"><i class="bi bi-person-plus text-primary me-2"></i> Create Approval Delegation</h5>
-                <a asp-action="Index" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i> Back</a>
-            </div>
-            <div class="card-body p-4">
-                <form asp-action="Create" method="post">
-                    @Html.AntiForgeryToken()
-
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Delegatee (User to receive approval authority) <span class="text-danger">*</span></label>
-                        <select name="delegateeUserId" class="form-select" required>
-                            <option value="">-- Select User --</option>
-                            @foreach (var u in users)
-                            {
-                                <option value="@u.Id">@u.FullName (@u.Email)</option>
-                            }
-                        </select>
-                        <div class="form-text">Selected user will receive pending approvals assigned to you during the delegation period.</div>
-                    </div>
-
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">Start Date & Time (UTC) <span class="text-danger">*</span></label>
-                            <input type="datetime-local" name="startDateUtc" class="form-control" value="@DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm")" required />
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">End Date & Time (UTC) <span class="text-danger">*</span></label>
-                            <input type="datetime-local" name="endDateUtc" class="form-control" value="@DateTime.UtcNow.AddDays(7).ToString("yyyy-MM-ddTHH:mm")" required />
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Request Type Scope (Optional)</label>
-                        <select name="requestTypeId" class="form-select">
-                            <option value="">-- All Request Types --</option>
-                            @foreach (var rt in requestTypes)
-                            {
-                                <option value="@rt.Id">@rt.Name (@rt.Code)</option>
-                            }
-                        </select>
-                        <div class="form-text">Leave blank to delegate approvals across ALL request types.</div>
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="form-label fw-semibold">Delegation Reason <span class="text-danger">*</span></label>
-                        <textarea name="reason" class="form-control" rows="3" placeholder="e.g. Annual Leave, Business Trip, Medical Leave" required></textarea>
-                    </div>
-
-                    <div class="d-flex justify-content-end gap-2">
-                        <a asp-action="Index" class="btn btn-light border">Cancel</a>
-                        <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i> Save Delegation</button>
-                    </div>
-                </form>
-            </div>
+<div class="max-w-2xl mx-auto w-full min-w-0 animate-slide-up">
+    <!-- Header -->
+    <div class="mb-6 flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+                <i class="bi bi-person-gear text-emerald-600"></i> Create Approval Delegation
+            </h1>
+            <p class="text-sm text-slate-500 mt-1">Delegate approval authority during leave or business travel.</p>
         </div>
+        <a asp-action="Index" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl transition-all shadow-xs">
+            <i class="bi bi-arrow-left"></i> Back
+        </a>
+    </div>
+
+    <!-- Form Card -->
+    <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 sm:p-8">
+        <form asp-action="Create" method="post" class="space-y-6">
+            @Html.AntiForgeryToken()
+
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Delegatee (User to receive approval authority) <span class="text-rose-500">*</span></label>
+                <select name="delegateeUserId" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 text-sm text-slate-900 bg-white transition-all" required>
+                    <option value="">-- Select User --</option>
+                    @foreach (var u in users)
+                    {
+                        <option value="@u.Id">@u.FullName (@u.Email)</option>
+                    }
+                </select>
+                <p class="text-[11px] text-slate-400 mt-1">Selected user will receive pending approvals assigned to you during the delegation period.</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Start Date & Time (UTC) <span class="text-rose-500">*</span></label>
+                    <input type="datetime-local" name="startDateUtc" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 text-sm text-slate-900 bg-white transition-all" value="@DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm")" required />
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">End Date & Time (UTC) <span class="text-rose-500">*</span></label>
+                    <input type="datetime-local" name="endDateUtc" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 text-sm text-slate-900 bg-white transition-all" value="@DateTime.UtcNow.AddDays(7).ToString("yyyy-MM-ddTHH:mm")" required />
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Request Type Scope (Optional)</label>
+                <select name="requestTypeId" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 text-sm text-slate-900 bg-white transition-all">
+                    <option value="">-- All Request Types --</option>
+                    @foreach (var rt in requestTypes)
+                    {
+                        <option value="@rt.Id">@rt.Name (@rt.Code)</option>
+                    }
+                </select>
+                <p class="text-[11px] text-slate-400 mt-1">Leave blank to delegate approvals across ALL request types.</p>
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Delegation Reason <span class="text-rose-500">*</span></label>
+                <textarea name="reason" rows="3" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 text-sm text-slate-900 bg-white transition-all resize-y" placeholder="e.g. Annual Leave, Business Trip, Medical Leave" required></textarea>
+            </div>
+
+            <div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
+                <a asp-action="Index" class="px-5 py-2.5 text-sm font-semibold text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition-all">Cancel</a>
+                <button type="submit" class="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-md shadow-emerald-600/20 transition-all hover:-translate-y-0.5">
+                    <i class="bi bi-check-lg"></i> Save Delegation
+                </button>
+            </div>
+        </form>
     </div>
 </div>

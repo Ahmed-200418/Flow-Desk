@@ -1,95 +1,105 @@
 @model FlowDesk.Application.Features.Audit.AuditLogDetailDto
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
     <div>
-        <a asp-action="Index" class="btn btn-outline-secondary btn-sm me-2 mb-2"><i class="bi bi-arrow-left me-1"></i> Back to Audit Logs</a>
-        <h3 class="fw-bold text-dark mb-1"><i class="bi bi-file-earmark-text text-primary me-2"></i> Audit Record Details</h3>
-        <p class="text-muted mb-0">Record ID: <span class="font-monospace">@Model.Id</span></p>
+        <a asp-action="Index" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors mb-2">
+            <i class="bi bi-arrow-left"></i> Back to Audit Logs
+        </a>
+        <h1 class="text-2xl font-bold text-slate-900 flex items-center gap-2">
+            <i class="bi bi-file-earmark-text text-emerald-600"></i> Audit Record Details
+        </h1>
+        <p class="text-sm text-slate-500 mt-1">Record ID: <span class="font-mono text-xs bg-slate-100 text-slate-800 px-1.5 py-0.5 rounded">@Model.Id</span></p>
     </div>
     <div>
-        <a asp-action="EntityHistory" asp-route-entityName="@Model.EntityName" asp-route-entityId="@Model.EntityId" class="btn btn-outline-info">
-            <i class="bi bi-clock-history me-1"></i> View Entity Timeline
+        <a asp-action="EntityHistory" asp-route-entityName="@Model.EntityName" asp-route-entityId="@Model.EntityId" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-sky-700 bg-sky-50 border border-sky-200 rounded-lg hover:bg-sky-100 transition-colors">
+            <i class="bi bi-clock-history"></i> View Entity Timeline
         </a>
     </div>
 </div>
 
-<div class="row g-4">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
     <!-- Metadata Card -->
-    <div class="col-lg-4">
-        <div class="card card-custom h-100">
-            <div class="card-header bg-light">
-                <i class="bi bi-info-circle me-2"></i> Record Metadata
+    <div class="lg:col-span-4">
+        <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden h-full flex flex-col">
+            <div class="px-5 py-4 bg-slate-50 border-b border-slate-200 font-semibold text-slate-800 flex items-center gap-2">
+                <i class="bi bi-info-circle text-emerald-600"></i> Record Metadata
             </div>
-            <div class="card-body">
-                <table class="table table-borderless table-sm mb-0">
-                    <tbody>
-                        <tr>
-                            <td class="text-muted fw-semibold">Action:</td>
-                            <td><span class="badge bg-primary">@Model.Action</span></td>
-                        </tr>
-                        <tr>
-                            <td class="text-muted fw-semibold">Entity Type:</td>
-                            <td><span class="fw-bold">@Model.EntityName</span></td>
-                        </tr>
-                        <tr>
-                            <td class="text-muted fw-semibold">Entity ID:</td>
-                            <td><span class="font-monospace text-break small">@Model.EntityId</span></td>
-                        </tr>
-                        <tr>
-                            <td class="text-muted fw-semibold">Timestamp (UTC):</td>
-                            <td><div class="fw-semibold">@Model.TimestampUtc.ToString("yyyy-MM-dd HH:mm:ss.fff")</div></td>
-                        </tr>
-                        <tr>
-                            <td class="text-muted fw-semibold">Actor Email:</td>
-                            <td>@(Model.UserEmail ?? "System / Automated")</td>
-                        </tr>
-                        <tr>
-                            <td class="text-muted fw-semibold">Actor User ID:</td>
-                            <td><span class="font-monospace small">@(Model.UserId?.ToString() ?? "N/A")</span></td>
-                        </tr>
-                        <tr>
-                            <td class="text-muted fw-semibold">IP Address:</td>
-                            <td><span class="font-monospace">@(Model.IpAddress ?? "Local / System")</span></td>
-                        </tr>
-                        <tr>
-                            <td class="text-muted fw-semibold">User Agent:</td>
-                            <td><small class="text-muted text-break">@(Model.UserAgent ?? "N/A")</small></td>
-                        </tr>
-                    </tbody>
-                </table>
+            <div class="p-5 flex-1 text-sm">
+                <dl class="divide-y divide-slate-100">
+                    <div class="py-2.5 grid grid-cols-3 gap-2">
+                        <dt class="font-medium text-slate-500">Action</dt>
+                        <dd class="col-span-2">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+                                @Model.Action
+                            </span>
+                        </dd>
+                    </div>
+                    <div class="py-2.5 grid grid-cols-3 gap-2">
+                        <dt class="font-medium text-slate-500">Entity Type</dt>
+                        <dd class="col-span-2 font-bold text-slate-900">@Model.EntityName</dd>
+                    </div>
+                    <div class="py-2.5 grid grid-cols-3 gap-2">
+                        <dt class="font-medium text-slate-500">Entity ID</dt>
+                        <dd class="col-span-2 font-mono text-xs text-slate-700 break-all">@Model.EntityId</dd>
+                    </div>
+                    <div class="py-2.5 grid grid-cols-3 gap-2">
+                        <dt class="font-medium text-slate-500">Timestamp (UTC)</dt>
+                        <dd class="col-span-2 font-medium text-slate-900">@Model.TimestampUtc.ToString("yyyy-MM-dd HH:mm:ss.fff")</dd>
+                    </div>
+                    <div class="py-2.5 grid grid-cols-3 gap-2">
+                        <dt class="font-medium text-slate-500">Actor Email</dt>
+                        <dd class="col-span-2 text-slate-800">@(Model.UserEmail ?? "System / Automated")</dd>
+                    </div>
+                    <div class="py-2.5 grid grid-cols-3 gap-2">
+                        <dt class="font-medium text-slate-500">Actor User ID</dt>
+                        <dd class="col-span-2 font-mono text-xs text-slate-600">@(Model.UserId?.ToString() ?? "N/A")</dd>
+                    </div>
+                    <div class="py-2.5 grid grid-cols-3 gap-2">
+                        <dt class="font-medium text-slate-500">IP Address</dt>
+                        <dd class="col-span-2 font-mono text-xs text-slate-700">@(Model.IpAddress ?? "Local / System")</dd>
+                    </div>
+                    <div class="py-2.5 grid grid-cols-3 gap-2">
+                        <dt class="font-medium text-slate-500">User Agent</dt>
+                        <dd class="col-span-2 text-xs text-slate-500 break-all">@(Model.UserAgent ?? "N/A")</dd>
+                    </div>
+                </dl>
             </div>
         </div>
     </div>
 
     <!-- Data Diffs Card -->
-    <div class="col-lg-8">
-        <div class="card card-custom h-100">
-            <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-code-square me-2"></i> State Diffs (Old vs New)</span>
-                <small class="text-muted"><i class="bi bi-shield-check me-1"></i> Redact-Protected</small>
+    <div class="lg:col-span-8">
+        <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden h-full flex flex-col">
+            <div class="px-5 py-4 bg-slate-50 border-b border-slate-200 font-semibold text-slate-800 flex items-center justify-between">
+                <span class="flex items-center gap-2"><i class="bi bi-code-square text-slate-600"></i> State Diffs (Old vs New)</span>
+                <span class="text-xs font-medium text-slate-500 flex items-center gap-1"><i class="bi bi-shield-check text-emerald-600"></i> Redact-Protected</span>
             </div>
-            <div class="card-body">
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold text-danger"><i class="bi bi-dash-circle me-1"></i> Old Values (Before)</label>
+            <div class="p-5 flex-1">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-rose-700 mb-2 flex items-center gap-1.5">
+                            <i class="bi bi-dash-circle"></i> Old Values (Before)
+                        </label>
                         @if (!string.IsNullOrEmpty(Model.OldValuesJson))
                         {
-                            <pre class="bg-dark text-warning p-3 rounded-3 font-monospace small" style="max-height: 400px; overflow-y: auto;"><code>@Model.OldValuesJson</code></pre>
+                            <pre class="bg-slate-900 text-amber-300 p-4 rounded-xl font-mono text-xs overflow-auto max-h-96"><code>@Model.OldValuesJson</code></pre>
                         }
                         else
                         {
-                            <div class="alert alert-light border text-muted small">No prior state recorded (Creation event).</div>
+                            <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl text-slate-500 text-xs">No prior state recorded (Creation event).</div>
                         }
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold text-success"><i class="bi bi-plus-circle me-1"></i> New Values (After)</label>
+                    <div>
+                        <label class="block text-sm font-semibold text-emerald-700 mb-2 flex items-center gap-1.5">
+                            <i class="bi bi-plus-circle"></i> New Values (After)
+                        </label>
                         @if (!string.IsNullOrEmpty(Model.NewValuesJson))
                         {
-                            <pre class="bg-dark text-success p-3 rounded-3 font-monospace small" style="max-height: 400px; overflow-y: auto;"><code>@Model.NewValuesJson</code></pre>
+                            <pre class="bg-slate-900 text-emerald-400 p-4 rounded-xl font-mono text-xs overflow-auto max-h-96"><code>@Model.NewValuesJson</code></pre>
                         }
                         else
                         {
-                            <div class="alert alert-light border text-muted small">No new state recorded (Deletion event).</div>
+                            <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl text-slate-500 text-xs">No new state recorded (Deletion event).</div>
                         }
                     </div>
                 </div>
@@ -97,3 +107,4 @@
         </div>
     </div>
 </div>
+

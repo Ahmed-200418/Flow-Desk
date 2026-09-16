@@ -3,42 +3,47 @@
     ViewData["Title"] = "User Profile";
 }
 
-<div class="row">
-    <div class="col-md-4">
-        <div class="card card-custom mb-4">
-            <div class="card-body text-center p-4">
-                <div class="user-avatar mx-auto mb-3" style="width: 80px; height: 80px; font-size: 2rem;">
-                    @(Model.FirstName.FirstOrDefault())
-                </div>
-                <h4 class="fw-bold m-0">@Model.FullName</h4>
-                <p class="text-muted">@(Model.JobTitle ?? "Employee")</p>
-                <span class="badge bg-primary fs-6 px-3 py-2">@Model.Email</span>
+<div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+    <div class="md:col-span-4">
+        <div class="bg-white border border-slate-200 rounded-xl shadow-sm p-6 text-center">
+            <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-2xl border-2 border-emerald-500 shadow-sm">
+                @(Model.FirstName.FirstOrDefault())
             </div>
+            <h2 class="text-xl font-bold text-slate-900">@Model.FullName</h2>
+            <p class="text-sm text-slate-500 mb-4">@(Model.JobTitle ?? "Employee")</p>
+            <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <i class="bi bi-envelope me-1.5"></i> @Model.Email
+            </span>
         </div>
     </div>
 
-    <div class="col-md-8">
-        <div class="card card-custom mb-4">
-            <div class="card-header">
-                <i class="bi bi-shield-check me-2 text-primary"></i> Assigned Roles & Permissions
+    <div class="md:col-span-8">
+        <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+            <div class="px-5 py-4 bg-slate-50 border-b border-slate-200 font-semibold text-slate-800 flex items-center gap-2">
+                <i class="bi bi-shield-check text-emerald-600"></i> Assigned Roles & Permissions
             </div>
-            <div class="card-body">
-                <h6 class="fw-semibold text-muted mb-2">ROLES</h6>
-                <div class="mb-4">
+            <div class="p-6">
+                <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Roles</h3>
+                <div class="flex flex-wrap gap-2 mb-6">
                     @foreach (var role in Model.Roles)
                     {
-                        <span class="badge bg-dark fs-6 me-1 mb-1">@role</span>
+                        <span class="inline-flex items-center px-3 py-1 rounded-lg text-xs font-semibold bg-slate-900 text-white">
+                            <i class="bi bi-shield me-1.5 text-emerald-400"></i> @role
+                        </span>
                     }
                 </div>
 
-                <h6 class="fw-semibold text-muted mb-2">PERMISSIONS</h6>
-                <div>
+                <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Permissions</h3>
+                <div class="flex flex-wrap gap-2">
                     @foreach (var perm in Model.Permissions)
                     {
-                        <span class="badge bg-secondary fs-6 me-1 mb-1">@perm</span>
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200">
+                            @perm
+                        </span>
                     }
                 </div>
             </div>
         </div>
     </div>
 </div>
+

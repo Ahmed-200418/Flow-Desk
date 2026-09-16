@@ -65,4 +65,73 @@ public class DepartmentsController : Controller
             return View();
         }
     }
+
+    [HttpGet]
+    public async Task<IActionResult> Details(Guid id)
+    {
+        ViewData["Title"] = "Department Details";
+        try
+        {
+            var dept = await _mediator.Send(new GetDepartmentByIdQuery(id));
+            return View(dept);
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = ex.Message;
+            return RedirectToAction(nameof(Index));
+        }
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Edit(Guid id)
+    {
+        ViewData["Title"] = "Edit Department";
+        try
+        {
+            var dept = await _mediator.Send(new GetDepartmentByIdQuery(id));
+            ViewBag.Departments = await _mediator.Send(new GetDepartmentsQuery(dept.OrganizationId));
+            return View(dept);
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = ex.Message;
+            return RedirectToAction(nameof(Index));
+        }
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(Guid id, string name, Guid? parentDepartmentId = null, Guid? managerUserId = null)
+    {
+        try
+        {
+            var updated = await _mediator.Send(new UpdateDepartmentCommand(id, name, parentDepartmentId, managerUserId));
+            TempData["Success"] = "Department updated successfully.";
+            return RedirectToAction(nameof(Index), new { organizationId = updated.OrganizationId });
+        }
+        catch (Exception ex)
+        {
+            ModelState.AddModelError(string.Empty, ex.Message);
+            var dept = await _mediator.Send(new GetDepartmentByIdQuery(id));
+            ViewBag.Departments = await _mediator.Send(new GetDepartmentsQuery(dept.OrganizationId));
+            return View(dept);
+        }
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(Guid id, Guid organizationId)
+    {
+        try
+        {
+            await _mediator.Send(new DeleteDepartmentCommand(id));
+            TempData["Success"] = "Department deleted successfully.";
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = ex.Message;
+        }
+
+        return RedirectToAction(nameof(Index), new { organizationId });
+    }
 }

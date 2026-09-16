@@ -4,160 +4,188 @@
     var pendingApprovals = ViewBag.PendingApprovals as List<FlowDesk.Application.Features.Approvals.PendingApprovalSummaryDto> ?? new List<FlowDesk.Application.Features.Approvals.PendingApprovalSummaryDto>();
 }
 
+<!-- Welcome Banner -->
+<div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-200">
+    <div>
+        <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Welcome back, @User.Identity?.Name! 👋</h1>
+        <p class="text-sm text-slate-500 mt-1">Here is what is happening across your enterprise workflows today.</p>
+    </div>
+    <div>
+        <a asp-controller="Requests" asp-action="Create" class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-md shadow-emerald-600/20 transition-all">
+            <i class="bi bi-plus-lg"></i> Create Request
+        </a>
+    </div>
+</div>
+
 <!-- Stat Cards -->
-<div class="row g-3 mb-4">
-    <div class="col-md-3">
-        <div class="card card-custom p-3 border-start border-primary border-4">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <div class="text-muted small fw-semibold">MY REQUESTS</div>
-                    <div class="fs-2 fw-bold text-dark">@ViewBag.MyRequestsCount</div>
-                </div>
-                <div class="bg-primary bg-opacity-10 p-3 rounded-circle text-primary">
-                    <i class="bi bi-file-earmark-text fs-3"></i>
-                </div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
+        <div class="flex items-center justify-between">
+            <div>
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">MY REQUESTS</span>
+                <div class="text-2xl font-bold text-slate-900 mt-1">@ViewBag.MyRequestsCount</div>
+            </div>
+            <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
+                <i class="bi bi-file-earmark-text text-xl"></i>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card card-custom p-3 border-start border-warning border-4">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <div class="text-muted small fw-semibold">PENDING APPROVALS</div>
-                    <div class="fs-2 fw-bold text-dark">@ViewBag.PendingApprovalsCount</div>
-                </div>
-                <div class="bg-warning bg-opacity-10 p-3 rounded-circle text-warning">
-                    <i class="bi bi-clock-history fs-3"></i>
-                </div>
+    <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
+        <div class="flex items-center justify-between">
+            <div>
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">PENDING APPROVALS</span>
+                <div class="text-2xl font-bold text-amber-600 mt-1">@ViewBag.PendingApprovalsCount</div>
+            </div>
+            <div class="p-3 bg-amber-50 text-amber-600 rounded-xl">
+                <i class="bi bi-clock-history text-xl"></i>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card card-custom p-3 border-start border-success border-4">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <div class="text-muted small fw-semibold">QUICK ACTION</div>
-                    <a asp-controller="Requests" asp-action="Create" class="btn btn-sm btn-success mt-1"><i class="bi bi-plus-circle me-1"></i> New Request</a>
+    <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
+        <div class="flex items-center justify-between">
+            <div>
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">WORKFLOW ENGINE</span>
+                <div class="mt-2">
+                    <a asp-controller="Workflows" asp-action="Index" class="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-lg transition-colors border border-emerald-200">Builder Studio &rarr;</a>
                 </div>
-                <div class="bg-success bg-opacity-10 p-3 rounded-circle text-success">
-                    <i class="bi bi-plus-lg fs-3"></i>
-                </div>
+            </div>
+            <div class="p-3 bg-sky-50 text-sky-600 rounded-xl">
+                <i class="bi bi-diagram-3 text-xl"></i>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card card-custom p-3 border-start border-info border-4">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <div class="text-muted small fw-semibold">WORKFLOW ENGINE</div>
-                    <a asp-controller="Workflows" asp-action="Index" class="btn btn-sm btn-info text-white mt-1"><i class="bi bi-diagram-2 me-1"></i> Workflows</a>
+    <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
+        <div class="flex items-center justify-between">
+            <div>
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">DELEGATIONS</span>
+                <div class="mt-2">
+                    <a asp-controller="Delegations" asp-action="Index" class="inline-flex items-center gap-1 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg transition-colors border border-slate-200">Manage &rarr;</a>
                 </div>
-                <div class="bg-info bg-opacity-10 p-3 rounded-circle text-info">
-                    <i class="bi bi-diagram-3 fs-3"></i>
-                </div>
+            </div>
+            <div class="p-3 bg-teal-50 text-teal-600 rounded-xl">
+                <i class="bi bi-person-gear text-xl"></i>
             </div>
         </div>
     </div>
 </div>
 
-<div class="row">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
     <!-- Pending Approvals Widget -->
-    <div class="col-md-6 mb-4">
-        <div class="card card-custom">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-check2-square text-warning me-2"></i> Pending My Approval</span>
-                <a asp-controller="Approvals" asp-action="Inbox" class="btn btn-sm btn-outline-primary">View Inbox (@ViewBag.PendingApprovalsCount)</a>
+    <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col">
+        <div class="px-5 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <i class="bi bi-check2-square text-amber-500 text-lg"></i>
+                <span class="font-bold text-slate-900">Pending My Approval</span>
             </div>
-            <div class="card-body p-0">
-                @if (pendingApprovals.Any())
-                {
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Request #</th>
-                                    <th>Title</th>
-                                    <th>Requester</th>
-                                    <th>Amount</th>
-                                    <th>Action</th>
+            <a asp-controller="Approvals" asp-action="Inbox" class="text-xs font-semibold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-lg transition-colors border border-emerald-200">View All Inbox</a>
+        </div>
+        <div class="p-0 flex-1">
+            @if (pendingApprovals.Any())
+            {
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                                <th class="px-5 py-3">Request #</th>
+                                <th class="px-5 py-3">Title</th>
+                                <th class="px-5 py-3">Requester</th>
+                                <th class="px-5 py-3">Amount</th>
+                                <th class="px-5 py-3 text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-xs">
+                            @foreach (var item in pendingApprovals)
+                            {
+                                <tr class="hover:bg-slate-50/80 transition-colors">
+                                    <td class="px-5 py-3.5 font-bold text-emerald-700">@item.RequestNumber</td>
+                                    <td class="px-5 py-3.5 font-semibold text-slate-900">@item.RequestTitle</td>
+                                    <td class="px-5 py-3.5 text-slate-600">@item.RequesterName</td>
+                                    <td class="px-5 py-3.5 font-semibold text-slate-900">@item.TotalAmount.ToString("N2") <span class="text-[11px] text-slate-400">@item.Currency</span></td>
+                                    <td class="px-5 py-3.5 text-right">
+                                        <a asp-controller="Approvals" asp-action="Action" asp-route-id="@item.ApprovalInstanceId" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-xs transition-colors">Review</a>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var item in pendingApprovals)
-                                {
-                                    <tr>
-                                        <td class="fw-semibold">@item.RequestNumber</td>
-                                        <td>@item.RequestTitle</td>
-                                        <td>@item.RequesterName</td>
-                                        <td>@item.TotalAmount.ToString("N2") @item.Currency</td>
-                                        <td>
-                                            <a asp-controller="Approvals" asp-action="Action" asp-route-id="@item.ApprovalInstanceId" class="btn btn-sm btn-primary py-0">Review</a>
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-10 px-4">
+                    <div class="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 inline-flex items-center justify-center text-xl mb-3">
+                        <i class="bi bi-check-circle"></i>
                     </div>
-                }
-                else
-                {
-                    <div class="text-center py-4 text-muted">
-                        <i class="bi bi-check-circle fs-2 text-success"></i>
-                        <p class="m-0 mt-2">No pending approvals requiring your action.</p>
-                    </div>
-                }
-            </div>
+                    <h3 class="text-sm font-bold text-slate-900 mb-1">All Caught Up!</h3>
+                    <p class="text-xs text-slate-500">No pending approvals requiring your immediate action.</p>
+                </div>
+            }
         </div>
     </div>
 
     <!-- Recent Requests Widget -->
-    <div class="col-md-6 mb-4">
-        <div class="card card-custom">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-file-earmark-text text-primary me-2"></i> Recent Requests</span>
-                <a asp-controller="Requests" asp-action="Index" class="btn btn-sm btn-outline-primary">All Requests</a>
+    <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col">
+        <div class="px-5 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <i class="bi bi-file-earmark-text text-emerald-600 text-lg"></i>
+                <span class="font-bold text-slate-900">Recent Requests</span>
             </div>
-            <div class="card-body p-0">
-                @if (recentRequests.Any())
-                {
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Request #</th>
-                                    <th>Title</th>
-                                    <th>Status</th>
-                                    <th>Total</th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var req in recentRequests)
+            <a asp-controller="Requests" asp-action="Index" class="text-xs font-semibold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg transition-colors border border-slate-200">View All</a>
+        </div>
+        <div class="p-0 flex-1">
+            @if (recentRequests.Any())
+            {
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                                <th class="px-5 py-3">Request #</th>
+                                <th class="px-5 py-3">Title</th>
+                                <th class="px-5 py-3">Status</th>
+                                <th class="px-5 py-3">Total Amount</th>
+                                <th class="px-5 py-3 text-right"></th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-xs">
+                            @foreach (var req in recentRequests)
+                            {
+                                var badgeClass = req.Status switch
                                 {
-                                    <tr>
-                                        <td class="fw-semibold">@req.RequestNumber</td>
-                                        <td>@req.Title</td>
-                                        <td>
-                                            <span class="badge badge-status bg-@req.Status.ToString().ToLower()">@req.Status</span>
-                                        </td>
-                                        <td>@req.TotalAmount.ToString("N2") @req.Currency</td>
-                                        <td>
-                                            <a asp-controller="Requests" asp-action="Details" asp-route-id="@req.Id" class="btn btn-sm btn-light border py-0"><i class="bi bi-eye"></i></a>
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
+                                    FlowDesk.Domain.Enums.RequestStatus.Approved => "bg-emerald-100 text-emerald-800 border-emerald-200",
+                                    FlowDesk.Domain.Enums.RequestStatus.Rejected => "bg-rose-100 text-rose-800 border-rose-200",
+                                    FlowDesk.Domain.Enums.RequestStatus.PendingApproval => "bg-amber-100 text-amber-800 border-amber-200",
+                                    FlowDesk.Domain.Enums.RequestStatus.Returned => "bg-orange-100 text-orange-800 border-orange-200",
+                                    _ => "bg-slate-100 text-slate-700 border-slate-200"
+                                };
+
+                                <tr class="hover:bg-slate-50/80 transition-colors">
+                                    <td class="px-5 py-3.5 font-bold text-slate-900">@req.RequestNumber</td>
+                                    <td class="px-5 py-3.5 font-medium text-slate-700">@req.Title</td>
+                                    <td class="px-5 py-3.5">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold border @badgeClass">@req.Status</span>
+                                    </td>
+                                    <td class="px-5 py-3.5 font-semibold text-slate-900">@req.TotalAmount.ToString("N2") <span class="text-[11px] text-slate-400">@req.Currency</span></td>
+                                    <td class="px-5 py-3.5 text-right">
+                                        <a asp-controller="Requests" asp-action="Details" asp-route-id="@req.Id" class="w-7 h-7 inline-flex items-center justify-center rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors" title="View Details"><i class="bi bi-eye"></i></a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-10 px-4">
+                    <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 inline-flex items-center justify-center text-xl mb-3 border border-slate-200">
+                        <i class="bi bi-inbox"></i>
                     </div>
-                }
-                else
-                {
-                    <div class="text-center py-4 text-muted">
-                        <i class="bi bi-inbox fs-2"></i>
-                        <p class="m-0 mt-2">No requests created yet. <a asp-controller="Requests" asp-action="Create">Create your first request</a>.</p>
-                    </div>
-                }
-            </div>
+                    <h3 class="text-sm font-bold text-slate-900 mb-1">No Requests Created Yet</h3>
+                    <p class="text-xs text-slate-500 mb-4">Get started by creating your first business request.</p>
+                    <a asp-controller="Requests" asp-action="Create" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors"><i class="bi bi-plus-lg"></i> New Request</a>
+                </div>
+            }
         </div>
     </div>
 </div>
+

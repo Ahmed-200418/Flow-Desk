@@ -1,9 +1,14 @@
 @{
     ViewData["Title"] = "Error";
 }
-<div class="text-center py-5">
-    <i class="bi bi-exclamation-diamond-fill text-warning" style="font-size: 4rem;"></i>
-    <h2 class="fw-bold mt-3 text-dark">An error occurred</h2>
-    <p class="text-muted">An error occurred while processing your request. Please try again or contact support.</p>
-    <a asp-controller="Home" asp-action="Index" class="btn btn-secondary"><i class="bi bi-house-door me-2"></i> Return to Dashboard</a>
+<div class="min-h-[50vh] flex flex-col items-center justify-center text-center py-12 px-4">
+    <div class="w-20 h-20 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center text-4xl mb-4 shadow-sm">
+        <i class="bi bi-exclamation-diamond-fill"></i>
+    </div>
+    <h1 class="text-2xl font-bold text-slate-900 mb-2">An error occurred</h1>
+    <p class="text-sm text-slate-500 max-w-md mb-6">An error occurred while processing your request. Please try again or contact support.</p>
+    <a asp-controller="Home" asp-action="Index" class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors shadow-sm">
+        <i class="bi bi-house-door"></i> Return to Dashboard
+    </a>
 </div>
+

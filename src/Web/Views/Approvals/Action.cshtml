@@ -5,86 +5,92 @@
     var idempotencyKey = (string)ViewBag.IdempotencyKey;
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-200">
     <div>
-        <h4 class="fw-bold m-0">Review Request #@Model.RequestNumber</h4>
-        <small class="text-muted">Assigned Step @approvalItem.StepNumber &bull; Requester: @Model.RequesterName</small>
+        <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Review Request #@Model.RequestNumber</h1>
+        <p class="text-sm text-slate-500 mt-1">Assigned Step @approvalItem.StepNumber &bull; Requester: <strong class="text-slate-800">@Model.RequesterName</strong></p>
     </div>
-    <div class="d-flex gap-2">
-        <a asp-action="Inbox" class="btn btn-light border"><i class="bi bi-arrow-left me-1"></i> Back to Inbox</a>
-        <button type="button" class="btn btn-success fw-semibold" data-bs-toggle="modal" data-bs-target="#approveModal"><i class="bi bi-check-lg me-1"></i> Approve</button>
-        <button type="button" class="btn btn-warning fw-semibold text-dark" data-bs-toggle="modal" data-bs-target="#returnModal"><i class="bi bi-arrow-return-left me-1"></i> Return</button>
-        <button type="button" class="btn btn-danger fw-semibold" data-bs-toggle="modal" data-bs-target="#rejectModal"><i class="bi bi-x-lg me-1"></i> Reject</button>
+    <div class="flex flex-wrap items-center gap-2">
+        <a asp-action="Inbox" class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors shadow-xs">
+            <i class="bi bi-arrow-left"></i> Back to Inbox
+        </a>
+        <button type="button" onclick="document.getElementById('approveModal').classList.remove('hidden')" class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-xs transition-colors">
+            <i class="bi bi-check-lg"></i> Approve
+        </button>
+        <button type="button" onclick="document.getElementById('returnModal').classList.remove('hidden')" class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-amber-900 bg-amber-400 hover:bg-amber-300 rounded-xl shadow-xs transition-colors">
+            <i class="bi bi-arrow-return-left"></i> Return
+        </button>
+        <button type="button" onclick="document.getElementById('rejectModal').classList.remove('hidden')" class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-xs transition-colors">
+            <i class="bi bi-x-lg"></i> Reject
+        </button>
     </div>
 </div>
 
-<div class="row">
-    <div class="col-md-8">
-        <div class="card card-custom mb-4">
-            <div class="card-header fw-bold">
-                <i class="bi bi-file-earmark-text text-primary me-2"></i> Request Overview
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <div class="lg:col-span-8 space-y-6">
+        <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+            <div class="px-5 py-4 bg-slate-50 border-b border-slate-200 font-bold text-slate-800 flex items-center gap-2">
+                <i class="bi bi-file-earmark-text text-emerald-600"></i> Request Overview
             </div>
-            <div class="card-body">
-                <h5 class="fw-bold text-dark mb-2">@Model.Title</h5>
-                <p class="text-secondary bg-light p-3 rounded" style="white-space: pre-line;">@Model.Description</p>
+            <div class="p-6">
+                <h2 class="text-xl font-bold text-slate-900 mb-3">@Model.Title</h2>
+                <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 text-sm mb-6 leading-relaxed whitespace-pre-line">@Model.Description</div>
 
-                <div class="p-3 bg-primary bg-opacity-10 border border-primary border-opacity-25 rounded d-flex justify-content-between align-items-center">
-                    <span class="fw-bold text-primary">Total Amount:</span>
-                    <span class="fs-4 fw-bold text-primary">@Model.TotalAmount.ToString("N2") @Model.Currency</span>
+                <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-between">
+                    <span class="font-semibold text-emerald-900 text-sm">Total Request Amount:</span>
+                    <span class="text-2xl font-bold text-emerald-700">@Model.TotalAmount.ToString("N2") @Model.Currency</span>
                 </div>
             </div>
         </div>
 
         <!-- Line Items -->
-        <div class="card card-custom mb-4">
-            <div class="card-header fw-bold">
-                <i class="bi bi-list-ul text-primary me-2"></i> Request Items
+        <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+            <div class="px-5 py-4 bg-slate-50 border-b border-slate-200 font-bold text-slate-800 flex items-center gap-2">
+                <i class="bi bi-list-ul text-emerald-600"></i> Request Items Breakdown
             </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Item Name</th>
-                                <th>Quantity</th>
-                                <th>Unit Price</th>
-                                <th>Total</th>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                            <th class="px-5 py-3">Item Description</th>
+                            <th class="px-5 py-3">Quantity</th>
+                            <th class="px-5 py-3">Unit Price</th>
+                            <th class="px-5 py-3 text-right">Total Price</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 text-xs">
+                        @foreach (var item in Model.Items)
+                        {
+                            <tr class="hover:bg-slate-50/80 transition-colors">
+                                <td class="px-5 py-3.5 font-semibold text-slate-900">@item.ItemName</td>
+                                <td class="px-5 py-3.5 text-slate-600">@item.Quantity</td>
+                                <td class="px-5 py-3.5 text-slate-600">@item.UnitPrice.ToString("N2") <span class="text-[11px] text-slate-400">@Model.Currency</span></td>
+                                <td class="px-5 py-3.5 font-bold text-slate-900 text-right">@item.TotalPrice.ToString("N2") <span class="text-[11px] text-slate-400">@Model.Currency</span></td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var item in Model.Items)
-                            {
-                                <tr>
-                                    <td class="fw-semibold">@item.ItemName</td>
-                                    <td>@item.Quantity</td>
-                                    <td>@item.UnitPrice.ToString("N2") @Model.Currency</td>
-                                    <td class="fw-bold">@item.TotalPrice.ToString("N2") @Model.Currency</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
+                        }
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 
-    <div class="col-md-4">
-        <div class="card card-custom mb-4">
-            <div class="card-header fw-bold">
-                <i class="bi bi-clock-history text-primary me-2"></i> Approval Task Summary
+    <div class="lg:col-span-4">
+        <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden sticky top-20">
+            <div class="px-5 py-4 bg-slate-50 border-b border-slate-200 font-bold text-slate-800 flex items-center gap-2">
+                <i class="bi bi-clock-history text-emerald-600"></i> Approval Task Summary
             </div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <small class="text-muted d-block">Current Step Number:</small>
-                    <span class="fw-bold fs-5 text-primary">Step @approvalItem.StepNumber</span>
-                </div>
-                <div class="mb-3">
-                    <small class="text-muted d-block">Assigned Date:</small>
-                    <span class="fw-semibold">@approvalItem.AssignedAtUtc.ToString("yyyy-MM-dd HH:mm")</span>
+            <div class="p-6 space-y-4 text-xs">
+                <div>
+                    <span class="text-slate-400 font-medium block mb-1">Current Step Number:</span>
+                    <span class="inline-flex items-center px-3 py-1.5 rounded-lg font-bold text-sm bg-emerald-50 text-emerald-700 border border-emerald-200">Step @approvalItem.StepNumber</span>
                 </div>
                 <div>
-                    <small class="text-muted d-block">SLA Due Date:</small>
-                    <span class="badge bg-warning text-dark">@approvalItem.DueAtUtc.ToString("yyyy-MM-dd HH:mm")</span>
+                    <span class="text-slate-400 font-medium block mb-1">Assigned At:</span>
+                    <span class="font-semibold text-slate-800">@approvalItem.AssignedAtUtc.ToString("yyyy-MM-dd HH:mm")</span>
+                </div>
+                <div>
+                    <span class="text-slate-400 font-medium block mb-1">SLA Due Date:</span>
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-md font-semibold bg-amber-50 text-amber-800 border border-amber-200">@approvalItem.DueAtUtc.ToString("yyyy-MM-dd HH:mm")</span>
                 </div>
             </div>
         </div>
@@ -92,86 +98,87 @@
 </div>
 
 <!-- Approve Modal -->
-<div class="modal fade" id="approveModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form asp-action="Approve" method="post">
-                @Html.AntiForgeryToken()
-                <input type="hidden" name="requestId" value="@Model.Id" />
-                <input type="hidden" name="approvalInstanceId" value="@approvalItem.ApprovalInstanceId" />
-                <input type="hidden" name="idempotencyKey" value="@idempotencyKey" />
-                <div class="modal-header">
-                    <h5 class="modal-title fw-bold text-success"><i class="bi bi-check-circle me-1"></i> Approve Request</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+<div id="approveModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden border border-slate-200">
+        <form asp-action="Approve" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="requestId" value="@Model.Id" />
+            <input type="hidden" name="approvalInstanceId" value="@approvalItem.ApprovalInstanceId" />
+            <input type="hidden" name="idempotencyKey" value="@idempotencyKey" />
+            <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
+                <h3 class="font-bold text-slate-900 text-base flex items-center gap-2 text-emerald-700">
+                    <i class="bi bi-check-circle-fill"></i> Approve Request
+                </h3>
+                <button type="button" onclick="document.getElementById('approveModal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+            </div>
+            <div class="p-6 space-y-4">
+                <p class="text-xs text-slate-500">Confirm approval decision for request #@Model.RequestNumber.</p>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Approval Comment (Optional)</label>
+                    <textarea name="comment" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors" rows="3" placeholder="Add optional approval note..."></textarea>
                 </div>
-                <div class="modal-body">
-                    <p class="text-muted small">Confirm approval for request #@Model.RequestNumber.</p>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Approval Comment (Optional)</label>
-                        <textarea name="comment" class="form-control" rows="3" placeholder="Add optional approval note..."></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-success fw-semibold"><i class="bi bi-check-lg me-1"></i> Confirm Approval</button>
-                </div>
-            </form>
-        </div>
+            </div>
+            <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-2">
+                <button type="button" onclick="document.getElementById('approveModal').classList.add('hidden')" class="px-4 py-2 text-xs font-semibold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50">Cancel</button>
+                <button type="submit" class="px-5 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-xs"><i class="bi bi-check-lg"></i> Confirm Approval</button>
+            </div>
+        </form>
     </div>
 </div>
 
 <!-- Return Modal -->
-<div class="modal fade" id="returnModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form asp-action="Return" method="post">
-                @Html.AntiForgeryToken()
-                <input type="hidden" name="requestId" value="@Model.Id" />
-                <input type="hidden" name="approvalInstanceId" value="@approvalItem.ApprovalInstanceId" />
-                <div class="modal-header">
-                    <h5 class="modal-title fw-bold text-warning"><i class="bi bi-arrow-return-left me-1"></i> Return Request</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+<div id="returnModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden border border-slate-200">
+        <form asp-action="Return" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="requestId" value="@Model.Id" />
+            <input type="hidden" name="approvalInstanceId" value="@approvalItem.ApprovalInstanceId" />
+            <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
+                <h3 class="font-bold text-amber-800 text-base flex items-center gap-2">
+                    <i class="bi bi-arrow-return-left"></i> Return Request
+                </h3>
+                <button type="button" onclick="document.getElementById('returnModal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+            </div>
+            <div class="p-6 space-y-4">
+                <p class="text-xs text-slate-500">Return this request to the requester for clarification or editing.</p>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Return Reason / Feedback</label>
+                    <textarea name="comment" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors" rows="3" required placeholder="Explain what changes are needed..."></textarea>
                 </div>
-                <div class="modal-body">
-                    <p class="text-muted small">Return this request to the requester for clarification or editing.</p>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Return Reason / Feedback</label>
-                        <textarea name="comment" class="form-control" rows="3" required placeholder="Explain what changes are needed..."></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-warning text-dark fw-semibold">Confirm Return</button>
-                </div>
-            </form>
-        </div>
+            </div>
+            <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-2">
+                <button type="button" onclick="document.getElementById('returnModal').classList.add('hidden')" class="px-4 py-2 text-xs font-semibold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50">Cancel</button>
+                <button type="submit" class="px-5 py-2 text-xs font-semibold text-amber-900 bg-amber-400 hover:bg-amber-300 rounded-xl shadow-xs">Confirm Return</button>
+            </div>
+        </form>
     </div>
 </div>
 
 <!-- Reject Modal -->
-<div class="modal fade" id="rejectModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form asp-action="Reject" method="post">
-                @Html.AntiForgeryToken()
-                <input type="hidden" name="requestId" value="@Model.Id" />
-                <input type="hidden" name="approvalInstanceId" value="@approvalItem.ApprovalInstanceId" />
-                <div class="modal-header">
-                    <h5 class="modal-title fw-bold text-danger"><i class="bi bi-x-circle me-1"></i> Reject Request</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+<div id="rejectModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden border border-slate-200">
+        <form asp-action="Reject" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="requestId" value="@Model.Id" />
+            <input type="hidden" name="approvalInstanceId" value="@approvalItem.ApprovalInstanceId" />
+            <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
+                <h3 class="font-bold text-rose-700 text-base flex items-center gap-2">
+                    <i class="bi bi-x-circle-fill"></i> Reject Request
+                </h3>
+                <button type="button" onclick="document.getElementById('rejectModal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+            </div>
+            <div class="p-6 space-y-4">
+                <p class="text-xs text-slate-500">Reject this request. This action is final.</p>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Rejection Reason</label>
+                    <textarea name="comment" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors" rows="3" required placeholder="Provide reason for rejection..."></textarea>
                 </div>
-                <div class="modal-body">
-                    <p class="text-muted small">Reject this request. This action is final.</p>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Rejection Reason</label>
-                        <textarea name="comment" class="form-control" rows="3" required placeholder="Provide reason for rejection..."></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-danger fw-semibold">Confirm Rejection</button>
-                </div>
-            </form>
-        </div>
+            </div>
+            <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-2">
+                <button type="button" onclick="document.getElementById('rejectModal').classList.add('hidden')" class="px-4 py-2 text-xs font-semibold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50">Cancel</button>
+                <button type="submit" class="px-5 py-2 text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-xs">Confirm Rejection</button>
+            </div>
+        </form>
     </div>
 </div>
+

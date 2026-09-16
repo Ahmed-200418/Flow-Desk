@@ -90,3 +90,81 @@ public class GetRequestTypesQueryHandler : IRequestHandler<GetRequestTypesQuery,
             .ToListAsync(cancellationToken);
     }
 }
+
+// Get Request Type By Id Query
+public record GetRequestTypeByIdQuery(Guid Id) : IRequest<RequestTypeDto>;
+
+public class GetRequestTypeByIdQueryHandler : IRequestHandler<GetRequestTypeByIdQuery, RequestTypeDto>
+{
+    private readonly IApplicationDbContext _context;
+
+    public GetRequestTypeByIdQueryHandler(IApplicationDbContext context)
+    {
+        _context = context;
+    }
+
+    public async Task<RequestTypeDto> Handle(GetRequestTypeByIdQuery request, CancellationToken cancellationToken)
+    {
+        var rt = await _context.RequestTypes.AsNoTracking().FirstOrDefaultAsync(rt => rt.Id == request.Id, cancellationToken);
+        if (rt == null) throw new NotFoundException(nameof(RequestType), request.Id);
+
+        return new RequestTypeDto(rt.Id, rt.OrganizationId, rt.Name, rt.Code, rt.Description, rt.Icon, rt.IsActive, rt.CreatedAtUtc);
+    }
+}
+
+// Update Request Type Command
+public record UpdateRequestTypeCommand(Guid Id, string Name, string Description, string? Icon, bool IsActive) : IRequest<RequestTypeDto>;
+
+public class UpdateRequestTypeCommandHandler : IRequestHandler<UpdateRequestTypeCommand, RequestTypeDto>
+{
+    private readonly IApplicationDbContext _context;
+
+    public UpdateRequestTypeCommandHandler(IApplicationDbContext context)
+    {
+        _context = context;
+    }
+
+    public async Task<RequestTypeDto> Handle(UpdateRequestTypeCommand request, CancellationToken cancellationToken)
+    {
+        var rt = await _context.RequestTypes.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+        if (rt == null) throw new NotFoundException(nameof(RequestType), request.Id);
+
+        var nameProp = typeof(RequestType).GetProperty(nameof(RequestType.Name));
+        nameProp?.SetValue(rt, request.Name.Trim());
+
+        var descProp = typeof(RequestType).GetProperty(nameof(RequestType.Description));
+        descProp?.SetValue(rt, request.Description.Trim());
+
+        var iconProp = typeof(RequestType).GetProperty(nameof(RequestType.Icon));
+        iconProp?.SetValue(rt, request.Icon?.Trim());
+
+        var activeProp = typeof(RequestType).GetProperty(nameof(RequestType.IsActive));
+        activeProp?.SetValue(rt, request.IsActive);
+
+        await _context.SaveChangesAsync(cancellationToken);
+
+        return new RequestTypeDto(rt.Id, rt.OrganizationId, rt.Name, rt.Code, rt.Description, rt.Icon, rt.IsActive, rt.CreatedAtUtc);
+    }
+}
+
+// Delete Request Type Command
+public record DeleteRequestTypeCommand(Guid Id) : IRequest;
+
+public class DeleteRequestTypeCommandHandler : IRequestHandler<DeleteRequestTypeCommand>
+{
+    private readonly IApplicationDbContext _context;
+
+    public DeleteRequestTypeCommandHandler(IApplicationDbContext context)
+    {
+        _context = context;
+    }
+
+    public async Task Handle(DeleteRequestTypeCommand request, CancellationToken cancellationToken)
+    {
+        var rt = await _context.RequestTypes.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+        if (rt == null) throw new NotFoundException(nameof(RequestType), request.Id);
+
+        _context.RequestTypes.Remove(rt);
+        await _context.SaveChangesAsync(cancellationToken);
+    }
+}

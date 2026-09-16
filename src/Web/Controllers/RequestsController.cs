@@ -171,4 +171,21 @@ public class RequestsController : Controller
 
         return RedirectToAction(nameof(Details), new { id });
     }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        try
+        {
+            await _mediator.Send(new DeleteRequestCommand(id));
+            TempData["Success"] = "Request deleted successfully.";
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = ex.Message;
+        }
+
+        return RedirectToAction(nameof(Index));
+    }
 }

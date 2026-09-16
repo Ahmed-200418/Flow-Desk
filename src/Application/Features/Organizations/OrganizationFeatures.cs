@@ -137,3 +137,25 @@ public class GetOrganizationByIdQueryHandler : IRequestHandler<GetOrganizationBy
         return new OrganizationDto(org.Id, org.Name, org.Code, org.Description, org.IsActive, org.CreatedAtUtc, org.UpdatedAtUtc);
     }
 }
+
+// Delete / Deactivate Command
+public record DeleteOrganizationCommand(Guid Id) : IRequest;
+
+public class DeleteOrganizationCommandHandler : IRequestHandler<DeleteOrganizationCommand>
+{
+    private readonly IApplicationDbContext _context;
+
+    public DeleteOrganizationCommandHandler(IApplicationDbContext context)
+    {
+        _context = context;
+    }
+
+    public async Task Handle(DeleteOrganizationCommand request, CancellationToken cancellationToken)
+    {
+        var org = await _context.Organizations.FirstOrDefaultAsync(o => o.Id == request.Id, cancellationToken);
+        if (org == null) throw new NotFoundException(nameof(Organization), request.Id);
+
+        _context.Organizations.Remove(org);
+        await _context.SaveChangesAsync(cancellationToken);
+    }
+}

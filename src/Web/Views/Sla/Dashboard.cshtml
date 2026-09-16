@@ -3,135 +3,144 @@
 
 @{
     var metrics = ViewBag.Metrics as SlaMetricsDto ?? new SlaMetricsDto(0, 0, 0, 0, 0);
+    ViewData["Title"] = "SLA & Escalations";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-200">
     <div>
-        <h3 class="fw-bold mb-1"><i class="bi bi-clock-history text-danger me-2"></i> SLA & Escalations Control Center</h3>
-        <p class="text-muted mb-0">Monitor workflow approval timeliness, reminders, and auto-escalated bottlenecks.</p>
+        <h1 class="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+            <i class="bi bi-clock-history text-rose-600"></i> SLA & Escalations Control Center
+        </h1>
+        <p class="text-sm text-slate-500 mt-1">Monitor workflow approval timeliness, reminders, and auto-escalated bottlenecks.</p>
     </div>
     <div>
-        <form asp-action="Process" method="post" class="d-inline">
+        <form asp-action="Process" method="post" class="inline">
             @Html.AntiForgeryToken()
-            <button type="submit" class="btn btn-warning text-dark fw-semibold">
-                <i class="bi bi-lightning-charge me-1"></i> Trigger SLA & Escalation Engine
+            <button type="submit" class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-amber-900 bg-amber-400 hover:bg-amber-300 rounded-xl transition-all shadow-sm hover:-translate-y-0.5">
+                <i class="bi bi-lightning-charge-fill"></i> Trigger SLA Engine
             </button>
         </form>
     </div>
 </div>
 
-<!-- SLA Metrics Cards -->
-<div class="row g-3 mb-4">
-    <div class="col-md-3">
-        <div class="card card-custom p-3 border-start border-primary border-4">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <div class="text-muted small fw-semibold text-uppercase">Total Pending</div>
-                    <h2 class="fw-bold text-dark mb-0">@metrics.TotalPending</h2>
-                </div>
-                <div class="bg-primary-subtle text-primary p-3 rounded-circle">
-                    <i class="bi bi-hourglass-split fs-4"></i>
-                </div>
+<!-- SLA Metrics Cards Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all border-l-4 border-l-emerald-600">
+        <div class="flex items-center justify-between">
+            <div>
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Pending</span>
+                <div class="text-3xl font-bold text-slate-900 mt-1">@metrics.TotalPending</div>
+            </div>
+            <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
+                <i class="bi bi-hourglass-split"></i>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card card-custom p-3 border-start border-success border-4">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <div class="text-muted small fw-semibold text-uppercase">On-Time</div>
-                    <h2 class="fw-bold text-success mb-0">@metrics.TotalOnTime</h2>
-                </div>
-                <div class="bg-success-subtle text-success p-3 rounded-circle">
-                    <i class="bi bi-check-circle fs-4"></i>
-                </div>
+    <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all border-l-4 border-l-teal-600">
+        <div class="flex items-center justify-between">
+            <div>
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">On-Time</span>
+                <div class="text-3xl font-bold text-teal-700 mt-1">@metrics.TotalOnTime</div>
+            </div>
+            <div class="w-12 h-12 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center text-xl">
+                <i class="bi bi-check-circle"></i>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card card-custom p-3 border-start border-warning border-4">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <div class="text-muted small fw-semibold text-uppercase">Reminder Due / Sent</div>
-                    <h2 class="fw-bold text-warning mb-0">@metrics.TotalReminder</h2>
-                </div>
-                <div class="bg-warning-subtle text-warning p-3 rounded-circle">
-                    <i class="bi bi-bell fs-4"></i>
-                </div>
+    <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all border-l-4 border-l-amber-500">
+        <div class="flex items-center justify-between">
+            <div>
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Reminder Sent</span>
+                <div class="text-3xl font-bold text-amber-600 mt-1">@metrics.TotalReminder</div>
+            </div>
+            <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl">
+                <i class="bi bi-bell"></i>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card card-custom p-3 border-start border-danger border-4">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <div class="text-muted small fw-semibold text-uppercase">Overdue / Escalated</div>
-                    <h2 class="fw-bold text-danger mb-0">@(metrics.TotalOverdue + metrics.TotalEscalated)</h2>
-                </div>
-                <div class="bg-danger-subtle text-danger p-3 rounded-circle">
-                    <i class="bi bi-exclamation-octagon fs-4"></i>
-                </div>
+    <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all border-l-4 border-l-rose-600">
+        <div class="flex items-center justify-between">
+            <div>
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Overdue / Escalated</span>
+                <div class="text-3xl font-bold text-rose-700 mt-1">@(metrics.TotalOverdue + metrics.TotalEscalated)</div>
+            </div>
+            <div class="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-xl">
+                <i class="bi bi-exclamation-octagon"></i>
             </div>
         </div>
     </div>
 </div>
 
 <!-- Overdue Approvals Table -->
-<div class="card card-custom">
-    <div class="card-header bg-white d-flex align-items-center justify-content-between">
-        <h5 class="m-0 fw-bold"><i class="bi bi-exclamation-triangle text-danger me-2"></i> Overdue Approvals & Escalation Queue</h5>
-        <span class="badge bg-danger">@Model.TotalCount Overdue Items</span>
+<div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md">
+    <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+        <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
+            <i class="bi bi-exclamation-triangle text-rose-600"></i> Overdue Approvals & Escalation Queue
+        </h2>
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-200">
+            @Model.TotalCount Overdue Items
+        </span>
     </div>
     @if (!Model.Items.Any())
     {
-        <div class="p-5 text-center">
-            <i class="bi bi-emoji-smile text-success display-4 mb-3"></i>
-            <h5>No Overdue Approvals!</h5>
-            <p class="text-muted mb-0">All pending approvals across the organization are progressing within their configured SLA limits.</p>
+        <div class="p-12 text-center">
+            <div class="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 inline-flex items-center justify-center text-2xl mb-3 border border-emerald-100">
+                <i class="bi bi-emoji-smile"></i>
+            </div>
+            <h3 class="text-base font-bold text-slate-900">No Overdue Approvals!</h3>
+            <p class="text-xs text-slate-500 mt-1">All pending approvals across the organization are progressing within their configured SLA limits.</p>
         </div>
     }
     else
     {
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th>Request #</th>
-                        <th>Title & Type</th>
-                        <th>Requester</th>
-                        <th>Assigned Approver</th>
-                        <th>Step #</th>
-                        <th>Assigned At (UTC)</th>
-                        <th>Due Date (UTC)</th>
-                        <th>Overdue By</th>
-                        <th>SLA Status</th>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-50 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                        <th class="px-5 py-3.5 whitespace-nowrap">Request #</th>
+                        <th class="px-5 py-3.5 min-w-[220px]">Title & Type</th>
+                        <th class="px-5 py-3.5 min-w-[140px]">Requester</th>
+                        <th class="px-5 py-3.5 min-w-[150px]">Assigned Approver</th>
+                        <th class="px-5 py-3.5 whitespace-nowrap">Step</th>
+                        <th class="px-5 py-3.5 whitespace-nowrap">Assigned At</th>
+                        <th class="px-5 py-3.5 whitespace-nowrap">Due Date</th>
+                        <th class="px-5 py-3.5 whitespace-nowrap">Overdue By</th>
+                        <th class="px-5 py-3.5 whitespace-nowrap">SLA Status</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="divide-y divide-slate-100 text-xs">
                     @foreach (var item in Model.Items)
                     {
-                        <tr>
-                            <td class="fw-bold text-primary">@item.RequestNumber</td>
-                            <td>
-                                <div>@item.RequestTitle</div>
-                                <small class="text-muted">@item.RequestTypeName</small>
+                        <tr class="hover:bg-slate-50/80 transition-colors">
+                            <td class="px-5 py-4 font-bold text-emerald-700 whitespace-nowrap">@item.RequestNumber</td>
+                            <td class="px-5 py-4 min-w-[220px]">
+                                <div class="font-bold text-slate-900 leading-snug">@item.RequestTitle</div>
+                                <div class="text-[11px] text-slate-500 mt-0.5">@item.RequestTypeName</div>
                             </td>
-                            <td>@item.RequesterName</td>
-                            <td class="fw-semibold">@item.AssignedApproverName</td>
-                            <td>Step @item.StepNumber</td>
-                            <td class="small">@item.AssignedAtUtc.ToString("yyyy-MM-dd HH:mm")</td>
-                            <td class="small text-danger fw-semibold">@item.DueAtUtc.ToString("yyyy-MM-dd HH:mm")</td>
-                            <td>
-                                <span class="badge bg-danger-subtle text-danger fw-bold">+@item.HoursOverdue hrs</span>
+                            <td class="px-5 py-4 text-slate-700 min-w-[140px]">@item.RequesterName</td>
+                            <td class="px-5 py-4 font-semibold text-slate-900 min-w-[150px]">@item.AssignedApproverName</td>
+                            <td class="px-5 py-4 text-slate-600 whitespace-nowrap">
+                                <span class="px-2 py-0.5 rounded bg-slate-100 border border-slate-200 font-medium">Step @item.StepNumber</span>
                             </td>
-                            <td>
+                            <td class="px-5 py-4 text-slate-500 whitespace-nowrap">@item.AssignedAtUtc.ToString("yyyy-MM-dd HH:mm")</td>
+                            <td class="px-5 py-4 text-rose-700 font-semibold whitespace-nowrap">@item.DueAtUtc.ToString("yyyy-MM-dd HH:mm")</td>
+                            <td class="px-5 py-4 whitespace-nowrap">
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-bold bg-rose-100 text-rose-800 border border-rose-200">
+                                    +@item.HoursOverdue hrs
+                                </span>
+                            </td>
+                            <td class="px-5 py-4 whitespace-nowrap">
                                 @if (item.IsEscalated)
                                 {
-                                    <span class="badge bg-purple text-white" style="background-color: #6f42c1;"><i class="bi bi-graph-up-arrow me-1"></i> Escalated</span>
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-rose-700 text-white shadow-xs">
+                                        <i class="bi bi-graph-up-arrow"></i> Escalated
+                                    </span>
                                 }
                                 else
                                 {
-                                    <span class="badge bg-danger"><i class="bi bi-alarm me-1"></i> Overdue</span>
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-100 text-amber-800 border border-amber-200">
+                                        <i class="bi bi-alarm"></i> Overdue
+                                    </span>
                                 }
                             </td>
                         </tr>

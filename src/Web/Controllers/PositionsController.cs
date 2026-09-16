@@ -68,4 +68,71 @@ public class PositionsController : Controller
             return View();
         }
     }
+
+    [HttpGet]
+    public async Task<IActionResult> Details(Guid id)
+    {
+        ViewData["Title"] = "Position Details";
+        try
+        {
+            var pos = await _mediator.Send(new GetPositionByIdQuery(id));
+            return View(pos);
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = ex.Message;
+            return RedirectToAction(nameof(Index));
+        }
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Edit(Guid id)
+    {
+        ViewData["Title"] = "Edit Position";
+        try
+        {
+            var pos = await _mediator.Send(new GetPositionByIdQuery(id));
+            return View(pos);
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = ex.Message;
+            return RedirectToAction(nameof(Index));
+        }
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(Guid id, string title, int level = 1)
+    {
+        try
+        {
+            var pos = await _mediator.Send(new UpdatePositionCommand(id, title, level));
+            TempData["Success"] = "Position updated successfully.";
+            return RedirectToAction(nameof(Index), new { departmentId = pos.DepartmentId });
+        }
+        catch (Exception ex)
+        {
+            ModelState.AddModelError(string.Empty, ex.Message);
+            var pos = await _mediator.Send(new GetPositionByIdQuery(id));
+            return View(pos);
+        }
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(Guid id, Guid departmentId)
+    {
+        try
+        {
+            await _mediator.Send(new DeletePositionCommand(id));
+            TempData["Success"] = "Position deleted successfully.";
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = ex.Message;
+        }
+
+        return RedirectToAction(nameof(Index), new { departmentId });
+    }
 }

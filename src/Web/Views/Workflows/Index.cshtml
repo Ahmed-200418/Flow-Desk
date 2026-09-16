@@ -3,73 +3,103 @@
     ViewData["Title"] = "Workflow Definitions";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-200">
     <div>
-        <h4 class="fw-bold m-0">Workflow Engine Definitions</h4>
-        <small class="text-muted">Configure versioned approval workflows, steps, and conditions</small>
+        <h1 class="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+            <i class="bi bi-diagram-3 text-emerald-600"></i> Workflow Engine Definitions
+        </h1>
+        <p class="text-sm text-slate-500 mt-1">Configure versioned multi-step approval workflows, step rules, and logic conditions.</p>
     </div>
-    <a asp-action="Create" class="btn btn-primary"><i class="bi bi-diagram-3-fill me-1"></i> Create Workflow</a>
+    <div>
+        <a asp-action="Create" class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-md shadow-emerald-600/20 transition-all hover:-translate-y-0.5">
+            <i class="bi bi-plus-lg"></i> Create Workflow
+        </a>
+    </div>
 </div>
 
-<div class="card card-custom">
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th>Code</th>
-                        <th>Workflow Name</th>
-                        <th>Active Version</th>
-                        <th>Total Versions</th>
-                        <th>Status</th>
-                        <th>Created</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (Model != null && Model.Items.Any())
+<div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md">
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-slate-50 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    <th class="px-5 py-3.5">Code</th>
+                    <th class="px-5 py-3.5">Workflow Name</th>
+                    <th class="px-5 py-3.5">Active Version</th>
+                    <th class="px-5 py-3.5">Total Versions</th>
+                    <th class="px-5 py-3.5">Status</th>
+                    <th class="px-5 py-3.5">Created</th>
+                    <th class="px-5 py-3.5 text-right min-w-[200px]">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-xs">
+                @if (Model != null && Model.Items.Any())
+                {
+                    foreach (var wf in Model.Items)
                     {
-                        foreach (var wf in Model.Items)
-                        {
-                            <tr>
-                                <td><span class="badge bg-dark">@wf.Code</span></td>
-                                <td class="fw-semibold">@wf.Name</td>
-                                <td>
-                                    @if (wf.ActiveVersion != null)
-                                    {
-                                        <span class="badge bg-success">v@wf.ActiveVersion.VersionNumber (Published)</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-warning text-dark">No Active Version</span>
-                                    }
-                                </td>
-                                <td>@wf.Versions.Count version(s)</td>
-                                <td>
-                                    @if (wf.IsActive)
-                                    {
-                                        <span class="badge bg-primary">Active</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-secondary">Inactive</span>
-                                    }
-                                </td>
-                                <td>@wf.CreatedAtUtc.ToString("yyyy-MM-dd")</td>
-                                <td>
-                                    <a asp-action="Builder" asp-route-id="@wf.Id" class="btn btn-sm btn-outline-primary py-0"><i class="bi bi-sliders me-1"></i> Workflow Builder</a>
-                                </td>
-                            </tr>
-                        }
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="7" class="text-center py-4 text-muted">No workflows configured.</td>
+                        <tr class="hover:bg-slate-50/80 transition-colors">
+                            <td class="px-5 py-4 font-bold text-slate-800 whitespace-nowrap">
+                                <span class="px-2.5 py-1 rounded-md bg-slate-100 border border-slate-200 text-slate-700 font-mono text-[11px]">@wf.Code</span>
+                            </td>
+                            <td class="px-5 py-4 font-semibold text-slate-900">@wf.Name</td>
+                            <td class="px-5 py-4 whitespace-nowrap">
+                                @if (wf.ActiveVersion != null)
+                                {
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> v@(wf.ActiveVersion.VersionNumber) Published
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> No Active Version
+                                    </span>
+                                }
+                            </td>
+                            <td class="px-5 py-4 text-slate-500 whitespace-nowrap">@wf.Versions.Count version(s)</td>
+                            <td class="px-5 py-4 whitespace-nowrap">
+                                @if (wf.IsActive)
+                                {
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Active
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-600 border border-slate-200">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> Inactive
+                                    </span>
+                                }
+                            </td>
+                            <td class="px-5 py-4 text-slate-500 whitespace-nowrap">@wf.CreatedAtUtc.ToString("yyyy-MM-dd")</td>
+                            <td class="px-5 py-4 text-right whitespace-nowrap">
+                                <div class="inline-flex items-center justify-end gap-2">
+                                    <a asp-action="Builder" asp-route-id="@wf.Id" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-xs transition-all hover:-translate-y-0.5">
+                                        <i class="bi bi-sliders"></i> Open Builder Studio
+                                    </a>
+                                    <form asp-action="Delete" asp-route-id="@wf.Id" method="post" class="inline" onsubmit="return confirm('Are you sure you want to delete workflow @wf.Name?');">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors" title="Delete Workflow">
+                                            <i class="bi bi-trash text-base"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
                         </tr>
                     }
-                </tbody>
-            </table>
-        </div>
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="7" class="px-5 py-12 text-center text-slate-500">
+                            <div class="flex flex-col items-center justify-center">
+                                <i class="bi bi-diagram-3 text-4xl text-slate-300 mb-2"></i>
+                                <span class="font-semibold text-slate-700">No Workflows Configured</span>
+                                <span class="text-xs text-slate-400 mt-0.5">Get started by creating your first workflow definition.</span>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
     </div>
 </div>

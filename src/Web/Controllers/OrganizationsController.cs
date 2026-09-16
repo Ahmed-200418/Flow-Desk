@@ -53,4 +53,71 @@ public class OrganizationsController : Controller
             return View();
         }
     }
+
+    [HttpGet]
+    public async Task<IActionResult> Details(Guid id)
+    {
+        ViewData["Title"] = "Organization Details";
+        try
+        {
+            var org = await _mediator.Send(new GetOrganizationByIdQuery(id));
+            return View(org);
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = ex.Message;
+            return RedirectToAction(nameof(Index));
+        }
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Edit(Guid id)
+    {
+        ViewData["Title"] = "Edit Organization";
+        try
+        {
+            var org = await _mediator.Send(new GetOrganizationByIdQuery(id));
+            return View(org);
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = ex.Message;
+            return RedirectToAction(nameof(Index));
+        }
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(Guid id, string name, string? description, bool isActive)
+    {
+        try
+        {
+            await _mediator.Send(new UpdateOrganizationCommand(id, name, description, isActive));
+            TempData["Success"] = "Organization updated successfully.";
+            return RedirectToAction(nameof(Index));
+        }
+        catch (Exception ex)
+        {
+            ModelState.AddModelError(string.Empty, ex.Message);
+            var org = await _mediator.Send(new GetOrganizationByIdQuery(id));
+            return View(org);
+        }
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        try
+        {
+            await _mediator.Send(new DeleteOrganizationCommand(id));
+            TempData["Success"] = "Organization deleted successfully.";
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = ex.Message;
+        }
+
+        return RedirectToAction(nameof(Index));
+    }
 }

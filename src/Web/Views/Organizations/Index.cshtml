@@ -3,71 +3,99 @@
     ViewData["Title"] = "Organizations Management";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-200">
     <div>
-        <h4 class="fw-bold m-0">Organizations</h4>
-        <small class="text-muted">Manage enterprise organizations</small>
+        <h1 class="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+            <i class="bi bi-building text-emerald-600"></i> Organizations
+        </h1>
+        <p class="text-sm text-slate-500 mt-1">Manage enterprise organizations and entity hierarchies.</p>
     </div>
-    <a asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i> Add Organization</a>
-</div>
-
-<div class="card card-custom mb-4">
-    <div class="card-body p-3">
-        <form method="get" class="row g-2">
-            <div class="col-md-4">
-                <input type="text" name="search" value="@ViewData["Search"]" class="form-control" placeholder="Search by name or code..." />
-            </div>
-            <div class="col-auto">
-                <button type="submit" class="btn btn-secondary"><i class="bi bi-search me-1"></i> Search</button>
-            </div>
-        </form>
+    <div>
+        <a asp-action="Create" class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-md shadow-emerald-600/20 transition-all hover:-translate-y-0.5">
+            <i class="bi bi-plus-lg"></i> Add Organization
+        </a>
     </div>
 </div>
 
-<div class="card card-custom">
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th>Code</th>
-                        <th>Name</th>
-                        <th>Description</th>
-                        <th>Status</th>
-                        <th>Created</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (Model.Items.Any())
+<!-- Search & Filter Bar -->
+<div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-4 mb-6">
+    <form method="get" class="flex flex-col sm:flex-row items-center gap-3">
+        <div class="relative flex-1 w-full">
+            <i class="bi bi-search absolute left-3.5 top-3 text-slate-400 text-sm"></i>
+            <input type="text" name="search" value="@ViewData["Search"]" class="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 text-slate-900" placeholder="Search by name or code..." />
+        </div>
+        <button type="submit" class="w-full sm:w-auto px-5 py-2.5 text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors">
+            Filter
+        </button>
+    </form>
+</div>
+
+<!-- Organizations Table Card -->
+<div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md">
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-slate-50 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    <th class="px-5 py-3.5">Code</th>
+                    <th class="px-5 py-3.5">Name</th>
+                    <th class="px-5 py-3.5">Description</th>
+                    <th class="px-5 py-3.5">Status</th>
+                    <th class="px-5 py-3.5">Created</th>
+                    <th class="px-5 py-3.5 text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-xs">
+                @if (Model.Items.Any())
+                {
+                    foreach (var item in Model.Items)
                     {
-                        foreach (var item in Model.Items)
-                        {
-                            <tr>
-                                <td><span class="badge bg-dark">@item.Code</span></td>
-                                <td class="fw-semibold">@item.Name</td>
-                                <td>@(item.Description ?? "-")</td>
-                                <td>
-                                    @if (item.IsActive)
-                                    {
-                                        <span class="badge bg-success">Active</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-secondary">Inactive</span>
-                                    }
-                                </td>
-                                <td>@item.CreatedAtUtc.ToString("yyyy-MM-dd HH:mm")</td>
-                            </tr>
-                        }
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="5" class="text-center py-4 text-muted">No organizations found.</td>
+                        <tr class="hover:bg-slate-50/80 transition-colors">
+                            <td class="px-5 py-4 font-bold text-slate-800 whitespace-nowrap">
+                                <span class="px-2.5 py-1 rounded-md bg-slate-100 border border-slate-200 text-slate-700 font-mono text-[11px]">@item.Code</span>
+                            </td>
+                            <td class="px-5 py-4 font-semibold text-slate-900">@item.Name</td>
+                            <td class="px-5 py-4 text-slate-600 max-w-md">@(item.Description ?? "-")</td>
+                            <td class="px-5 py-4 whitespace-nowrap">
+                                @if (item.IsActive)
+                                {
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Active
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-600 border border-slate-200">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> Inactive
+                                    </span>
+                                }
+                            </td>
+                            <td class="px-5 py-4 text-slate-500 whitespace-nowrap">@item.CreatedAtUtc.ToString("yyyy-MM-dd")</td>
+                            <td class="px-5 py-4 text-right whitespace-nowrap">
+                                <div class="inline-flex items-center justify-end gap-1">
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="p-1.5 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors" title="Details">
+                                        <i class="bi bi-eye text-base"></i>
+                                    </a>
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="p-1.5 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors" title="Edit">
+                                        <i class="bi bi-pencil text-base"></i>
+                                    </a>
+                                    <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="inline" onsubmit="return confirm('Are you sure you want to delete organization @item.Name?');">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors" title="Delete">
+                                            <i class="bi bi-trash text-base"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
                         </tr>
                     }
-                </tbody>
-            </table>
-        </div>
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="6" class="px-5 py-12 text-center text-slate-500">No organizations found.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
     </div>
 </div>

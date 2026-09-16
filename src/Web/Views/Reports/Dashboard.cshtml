@@ -5,98 +5,102 @@
     var managerReport = ViewData["ManagerReport"] as ManagerDashboardReportDto;
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
     <div>
-        <h3 class="fw-bold text-dark mb-1"><i class="bi bi-pie-chart text-primary me-2"></i> Executive Reporting & Analytics</h3>
-        <p class="text-muted mb-0">System-wide performance indicators, SLA compliance, department throughput, and bottleneck diagnostics.</p>
+        <h1 class="text-2xl font-bold text-slate-900 flex items-center gap-2">
+            <i class="bi bi-pie-chart text-emerald-600"></i> Executive Reporting & Analytics
+        </h1>
+        <p class="text-sm text-slate-500 mt-1">System-wide performance indicators, SLA compliance, department throughput, and bottleneck diagnostics.</p>
     </div>
-    <div class="d-flex gap-2">
+    <div class="flex gap-2">
         <a asp-action="Export"
            asp-route-fromDate="@ViewData["FromDate"]"
            asp-route-toDate="@ViewData["ToDate"]"
            asp-route-departmentId="@ViewData["DepartmentId"]"
-           class="btn btn-outline-success">
-            <i class="bi bi-file-earmark-spreadsheet me-1"></i> Export Analytics CSV
+           class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-xl hover:bg-emerald-100 transition-colors shadow-sm">
+            <i class="bi bi-file-earmark-spreadsheet"></i> Export Analytics CSV
         </a>
     </div>
 </div>
 
 <!-- Executive Summary Cards -->
-<div class="row g-3 mb-4">
-    <div class="col-md-2-4 col-md-3">
-        <div class="card card-custom h-100 p-3">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <div class="text-muted small fw-semibold">TOTAL REQUESTS</div>
-                    <div class="fs-3 fw-bold text-dark">@Model.TotalRequests.ToString("N0")</div>
-                    <small class="text-muted">All-time platform volume</small>
-                </div>
-                <div class="bg-primary-subtle text-primary p-3 rounded-3">
-                    <i class="bi bi-file-earmark-bar-graph fs-4"></i>
-                </div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+        <div class="flex items-center justify-between">
+            <div>
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">TOTAL REQUESTS</span>
+                <div class="text-2xl font-bold text-slate-900 mt-1">@Model.TotalRequests.ToString("N0")</div>
+                <span class="text-xs text-slate-400">All-time platform volume</span>
+            </div>
+            <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
+                <i class="bi bi-file-earmark-bar-graph text-xl"></i>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card card-custom h-100 p-3">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <div class="text-muted small fw-semibold">PENDING APPROVALS</div>
-                    <div class="fs-3 fw-bold text-warning">@Model.PendingRequests.ToString("N0")</div>
-                    <small class="text-muted">Active in approval pipelines</small>
-                </div>
-                <div class="bg-warning-subtle text-warning p-3 rounded-3">
-                    <i class="bi bi-hourglass-split fs-4"></i>
-                </div>
+    <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+        <div class="flex items-center justify-between">
+            <div>
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">PENDING APPROVALS</span>
+                <div class="text-2xl font-bold text-amber-600 mt-1">@Model.PendingRequests.ToString("N0")</div>
+                <span class="text-xs text-slate-400">Active in approval pipelines</span>
+            </div>
+            <div class="p-3 bg-amber-50 text-amber-600 rounded-xl">
+                <i class="bi bi-hourglass-split text-xl"></i>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card card-custom h-100 p-3">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <div class="text-muted small fw-semibold">AVG APPROVAL TIME</div>
-                    <div class="fs-3 fw-bold text-info">@Model.AverageApprovalTimeHours.ToString("F1")h</div>
-                    <small class="text-muted">Submission to completion</small>
-                </div>
-                <div class="bg-info-subtle text-info p-3 rounded-3">
-                    <i class="bi bi-stopwatch fs-4"></i>
-                </div>
+    <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+        <div class="flex items-center justify-between">
+            <div>
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">AVG APPROVAL TIME</span>
+                <div class="text-2xl font-bold text-sky-700 mt-1">@Model.AverageApprovalTimeHours.ToString("F1")h</div>
+                <span class="text-xs text-slate-400">Submission to completion</span>
+            </div>
+            <div class="p-3 bg-sky-50 text-sky-600 rounded-xl">
+                <i class="bi bi-stopwatch text-xl"></i>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card card-custom h-100 p-3">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <div class="text-muted small fw-semibold">SLA COMPLIANCE</div>
-                    <div class="fs-3 fw-bold text-success">@Model.SlaCompliancePercentage.ToString("F1")%</div>
-                    <small class="text-muted">Completed within 48h limit</small>
-                </div>
-                <div class="bg-success-subtle text-success p-3 rounded-3">
-                    <i class="bi bi-shield-check fs-4"></i>
-                </div>
+    <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+        <div class="flex items-center justify-between">
+            <div>
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">SLA COMPLIANCE</span>
+                <div class="text-2xl font-bold text-emerald-600 mt-1">@Model.SlaCompliancePercentage.ToString("F1")%</div>
+                <span class="text-xs text-slate-400">Completed within SLA limits</span>
+            </div>
+            <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
+                <i class="bi bi-shield-check text-xl"></i>
             </div>
         </div>
     </div>
 </div>
 
 <!-- Personal Quick Overview Widgets -->
-<div class="row g-4 mb-4">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
     @if (employeeReport != null)
     {
-        <div class="col-lg-6">
-            <div class="card card-custom h-100">
-                <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                    <span><i class="bi bi-person-workspace me-2"></i> Employee Dashboard (My Requests)</span>
-                    <a asp-controller="Requests" asp-action="Index" class="btn btn-sm btn-link">View All</a>
-                </div>
-                <div class="card-body">
-                    <div class="row text-center g-2 mb-3">
-                        <div class="col"><div class="p-2 border rounded bg-light"><div class="fs-5 fw-bold text-dark">@employeeReport.TotalMyRequests</div><small class="text-muted">Total</small></div></div>
-                        <div class="col"><div class="p-2 border rounded bg-warning-subtle"><div class="fs-5 fw-bold text-warning">@employeeReport.PendingCount</div><small class="text-muted">Pending</small></div></div>
-                        <div class="col"><div class="p-2 border rounded bg-success-subtle"><div class="fs-5 fw-bold text-success">@employeeReport.ApprovedCount</div><small class="text-muted">Approved</small></div></div>
-                        <div class="col"><div class="p-2 border rounded bg-danger-subtle"><div class="fs-5 fw-bold text-danger">@employeeReport.RejectedCount</div><small class="text-muted">Rejected</small></div></div>
+        <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col">
+            <div class="px-5 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between font-semibold text-slate-800">
+                <span class="flex items-center gap-2"><i class="bi bi-person-workspace text-emerald-600"></i> Employee Dashboard (My Requests)</span>
+                <a asp-controller="Requests" asp-action="Index" class="text-xs text-emerald-700 hover:text-emerald-800 font-semibold">View All &rarr;</a>
+            </div>
+            <div class="p-5 flex-1">
+                <div class="grid grid-cols-4 gap-2 text-center">
+                    <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
+                        <div class="text-lg font-bold text-slate-900">@employeeReport.TotalMyRequests</div>
+                        <span class="text-[11px] text-slate-500 font-medium">Total</span>
+                    </div>
+                    <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl">
+                        <div class="text-lg font-bold text-amber-700">@employeeReport.PendingCount</div>
+                        <span class="text-[11px] text-amber-700 font-medium">Pending</span>
+                    </div>
+                    <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl">
+                        <div class="text-lg font-bold text-emerald-700">@employeeReport.ApprovedCount</div>
+                        <span class="text-[11px] text-emerald-700 font-medium">Approved</span>
+                    </div>
+                    <div class="p-3 bg-rose-50 border border-rose-200 rounded-xl">
+                        <div class="text-lg font-bold text-rose-700">@employeeReport.RejectedCount</div>
+                        <span class="text-[11px] text-rose-700 font-medium">Rejected</span>
                     </div>
                 </div>
             </div>
@@ -105,18 +109,28 @@
 
     @if (managerReport != null)
     {
-        <div class="col-lg-6">
-            <div class="card card-custom h-100">
-                <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                    <span><i class="bi bi-briefcase me-2"></i> Manager Dashboard (Pending Approvals)</span>
-                    <a asp-controller="Approvals" asp-action="Inbox" class="btn btn-sm btn-link">Approval Inbox</a>
-                </div>
-                <div class="card-body">
-                    <div class="row text-center g-2 mb-3">
-                        <div class="col"><div class="p-2 border rounded bg-warning-subtle"><div class="fs-5 fw-bold text-warning">@managerReport.PendingApprovalsCount</div><small class="text-muted">Assigned</small></div></div>
-                        <div class="col"><div class="p-2 border rounded bg-success-subtle"><div class="fs-5 fw-bold text-success">@managerReport.ApprovedTodayCount</div><small class="text-muted">Approved Today</small></div></div>
-                        <div class="col"><div class="p-2 border rounded bg-danger-subtle"><div class="fs-5 fw-bold text-danger">@managerReport.RejectedTodayCount</div><small class="text-muted">Rejected Today</small></div></div>
-                        <div class="col"><div class="p-2 border rounded bg-danger text-white"><div class="fs-5 fw-bold">@managerReport.OverdueApprovalsCount</div><small class="text-white-50">Overdue SLA</small></div></div>
+        <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col">
+            <div class="px-5 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between font-semibold text-slate-800">
+                <span class="flex items-center gap-2"><i class="bi bi-briefcase text-emerald-600"></i> Manager Dashboard (Pending Approvals)</span>
+                <a asp-controller="Approvals" asp-action="Inbox" class="text-xs text-emerald-700 hover:text-emerald-800 font-semibold">Approval Inbox &rarr;</a>
+            </div>
+            <div class="p-5 flex-1">
+                <div class="grid grid-cols-4 gap-2 text-center">
+                    <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl">
+                        <div class="text-lg font-bold text-amber-700">@managerReport.PendingApprovalsCount</div>
+                        <span class="text-[11px] text-amber-700 font-medium">Assigned</span>
+                    </div>
+                    <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl">
+                        <div class="text-lg font-bold text-emerald-700">@managerReport.ApprovedTodayCount</div>
+                        <span class="text-[11px] text-emerald-700 font-medium">Approved Today</span>
+                    </div>
+                    <div class="p-3 bg-rose-50 border border-rose-200 rounded-xl">
+                        <div class="text-lg font-bold text-rose-700">@managerReport.RejectedTodayCount</div>
+                        <span class="text-[11px] text-rose-700 font-medium">Rejected Today</span>
+                    </div>
+                    <div class="p-3 bg-rose-700 text-white rounded-xl shadow-sm">
+                        <div class="text-lg font-bold">@managerReport.OverdueApprovalsCount</div>
+                        <span class="text-[11px] text-rose-100 font-medium">Overdue SLA</span>
                     </div>
                 </div>
             </div>
@@ -125,92 +139,99 @@
 </div>
 
 <!-- Department Performance Analytics -->
-<div class="card card-custom mb-4">
-    <div class="card-header bg-light">
-        <i class="bi bi-building me-2"></i> Department Performance & Throughput
+<div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden mb-6">
+    <div class="px-5 py-4 bg-slate-50 border-b border-slate-200 font-semibold text-slate-800 flex items-center gap-2">
+        <i class="bi bi-building text-emerald-600"></i> Department Performance & Throughput
     </div>
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th>Department</th>
-                        <th>Total Volume</th>
-                        <th>Approved</th>
-                        <th>Rejected</th>
-                        <th>Avg Processing Time</th>
-                        <th>Approval Ratio</th>
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                    <th class="px-5 py-3">Department</th>
+                    <th class="px-5 py-3">Total Volume</th>
+                    <th class="px-5 py-3">Approved</th>
+                    <th class="px-5 py-3">Rejected</th>
+                    <th class="px-5 py-3">Avg Processing Time</th>
+                    <th class="px-5 py-3">Approval Ratio</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-xs">
+                @foreach (var dept in Model.DepartmentAnalytics)
+                {
+                    var ratio = dept.TotalRequests > 0 ? Math.Round((double)dept.ApprovedRequests / dept.TotalRequests * 100.0, 1) : 0.0;
+                    <tr class="hover:bg-slate-50/80 transition-colors">
+                        <td class="px-5 py-3 font-bold text-slate-900 flex items-center gap-2">
+                            <i class="bi bi-diagram-3 text-emerald-600"></i>@dept.DepartmentName
+                        </td>
+                        <td class="px-5 py-3 font-semibold text-slate-700">@dept.TotalRequests</td>
+                        <td class="px-5 py-3">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-800">
+                                @dept.ApprovedRequests
+                            </span>
+                        </td>
+                        <td class="px-5 py-3">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-rose-100 text-rose-800">
+                                @dept.RejectedRequests
+                            </span>
+                        </td>
+                        <td class="px-5 py-3 font-mono text-slate-700">@dept.AverageApprovalTimeHours.ToString("F1") hrs</td>
+                        <td class="px-5 py-3 w-48">
+                            <div class="flex items-center gap-2">
+                                <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden border border-slate-200">
+                                    <div class="bg-emerald-500 h-2 rounded-full" style="width: @ratio%"></div>
+                                </div>
+                                <span class="font-bold text-slate-800 text-[11px]">@ratio%</span>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Workflow Bottleneck Diagnostics -->
+<div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+    <div class="px-5 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+        <span class="font-semibold text-slate-800 flex items-center gap-2"><i class="bi bi-exclamation-triangle text-amber-500"></i> Workflow Bottleneck Diagnostics</span>
+        <span class="text-xs text-slate-500">Steps with longest average waiting times</span>
+    </div>
+    @if (!Model.WorkflowBottlenecks.Any())
+    {
+        <div class="text-center py-8 text-slate-500">
+            <i class="bi bi-check-circle-fill text-3xl text-emerald-600"></i>
+            <p class="mt-2 text-xs font-medium">No approval bottlenecks detected across active workflows.</p>
+        </div>
+    }
+    else
+    {
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                        <th class="px-5 py-3">Step Name</th>
+                        <th class="px-5 py-3">Workflow Context</th>
+                        <th class="px-5 py-3">Pending In Step</th>
+                        <th class="px-5 py-3">Avg Waiting Time</th>
+                        <th class="px-5 py-3">Severity</th>
                     </tr>
                 </thead>
-                <tbody>
-                    @foreach (var dept in Model.DepartmentAnalytics)
+                <tbody class="divide-y divide-slate-100 text-xs">
+                    @foreach (var b in Model.WorkflowBottlenecks)
                     {
-                        var ratio = dept.TotalRequests > 0 ? Math.Round((double)dept.ApprovedRequests / dept.TotalRequests * 100.0, 1) : 0.0;
-                        <tr>
-                            <td class="fw-bold"><i class="bi bi-diagram-3 me-2 text-primary"></i>@dept.DepartmentName</td>
-                            <td>@dept.TotalRequests</td>
-                            <td><span class="badge bg-success">@dept.ApprovedRequests</span></td>
-                            <td><span class="badge bg-danger">@dept.RejectedRequests</span></td>
-                            <td><span class="font-monospace">@dept.AverageApprovalTimeHours.ToString("F1") hrs</span></td>
-                            <td style="width: 200px;">
-                                <div class="d-flex align-items-center gap-2">
-                                    <div class="progress flex-grow-1" style="height: 8px;">
-                                        <div class="progress-bar bg-success" style="width: @ratio%"></div>
-                                    </div>
-                                    <small class="fw-bold">@ratio%</small>
-                                </div>
-                            </td>
+                        var severityBadge = b.AverageWaitTimeHours > 48 ? "bg-rose-100 text-rose-800 border-rose-200" : (b.AverageWaitTimeHours > 24 ? "bg-amber-100 text-amber-800 border-amber-200" : "bg-sky-100 text-sky-800 border-sky-200");
+                        var severityText = b.AverageWaitTimeHours > 48 ? "High Bottleneck (>48h)" : (b.AverageWaitTimeHours > 24 ? "Medium Delay (>24h)" : "Normal Progress");
+                        <tr class="hover:bg-slate-50/80 transition-colors">
+                            <td class="px-5 py-3 font-bold text-slate-900">@b.StepName</td>
+                            <td class="px-5 py-3 text-slate-600">@b.WorkflowName</td>
+                            <td class="px-5 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">@b.TotalPendingInStep requests</span></td>
+                            <td class="px-5 py-3 font-mono font-semibold text-slate-900">@b.AverageWaitTimeHours.ToString("F1") hours</td>
+                            <td class="px-5 py-3"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold border @severityBadge">@severityText</span></td>
                         </tr>
                     }
                 </tbody>
             </table>
         </div>
-    </div>
+    }
 </div>
 
-<!-- Workflow Bottleneck Diagnostics -->
-<div class="card card-custom">
-    <div class="card-header bg-light d-flex justify-content-between align-items-center">
-        <span><i class="bi bi-exclamation-triangle me-2 text-warning"></i> Workflow Bottleneck Diagnostics</span>
-        <small class="text-muted">Steps with longest average waiting times</small>
-    </div>
-    <div class="card-body p-0">
-        @if (!Model.WorkflowBottlenecks.Any())
-        {
-            <div class="text-center py-4 text-muted">
-                <i class="bi bi-check-circle-fill fs-3 text-success"></i>
-                <p class="mt-2 mb-0">No approval bottlenecks detected across active workflows.</p>
-            </div>
-        }
-        else
-        {
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Step Name</th>
-                            <th>Workflow Context</th>
-                            <th>Pending In Step</th>
-                            <th>Avg Waiting Time</th>
-                            <th>Severity</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var b in Model.WorkflowBottlenecks)
-                        {
-                            var severityBadge = b.AverageWaitTimeHours > 48 ? "bg-danger" : (b.AverageWaitTimeHours > 24 ? "bg-warning text-dark" : "bg-info text-dark");
-                            var severityText = b.AverageWaitTimeHours > 48 ? "High Bottleneck (>48h)" : (b.AverageWaitTimeHours > 24 ? "Medium Delay (>24h)" : "Normal Progress");
-                            <tr>
-                                <td class="fw-bold">@b.StepName</td>
-                                <td>@b.WorkflowName</td>
-                                <td><span class="badge bg-secondary">@b.TotalPendingInStep requests</span></td>
-                                <td><span class="font-monospace text-dark fw-semibold">@b.AverageWaitTimeHours.ToString("F1") hours</span></td>
-                                <td><span class="badge @severityBadge">@severityText</span></td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        }
-    </div>
-</div>

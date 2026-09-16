@@ -74,3 +74,75 @@ public class GetPositionsByDepartmentQueryHandler : IRequestHandler<GetPositions
             .ToListAsync(cancellationToken);
     }
 }
+
+// Get Position By Id Query
+public record GetPositionByIdQuery(Guid Id) : IRequest<PositionDto>;
+
+public class GetPositionByIdQueryHandler : IRequestHandler<GetPositionByIdQuery, PositionDto>
+{
+    private readonly IApplicationDbContext _context;
+
+    public GetPositionByIdQueryHandler(IApplicationDbContext context)
+    {
+        _context = context;
+    }
+
+    public async Task<PositionDto> Handle(GetPositionByIdQuery request, CancellationToken cancellationToken)
+    {
+        var position = await _context.Positions.AsNoTracking().FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken);
+        if (position == null) throw new NotFoundException(nameof(Position), request.Id);
+
+        return new PositionDto(position.Id, position.DepartmentId, position.Title, position.Code, position.Level);
+    }
+}
+
+// Update Position Command
+public record UpdatePositionCommand(Guid Id, string Title, int Level) : IRequest<PositionDto>;
+
+public class UpdatePositionCommandHandler : IRequestHandler<UpdatePositionCommand, PositionDto>
+{
+    private readonly IApplicationDbContext _context;
+
+    public UpdatePositionCommandHandler(IApplicationDbContext context)
+    {
+        _context = context;
+    }
+
+    public async Task<PositionDto> Handle(UpdatePositionCommand request, CancellationToken cancellationToken)
+    {
+        var position = await _context.Positions.FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken);
+        if (position == null) throw new NotFoundException(nameof(Position), request.Id);
+
+        var titleProp = typeof(Position).GetProperty(nameof(Position.Title));
+        titleProp?.SetValue(position, request.Title.Trim());
+
+        var levelProp = typeof(Position).GetProperty(nameof(Position.Level));
+        levelProp?.SetValue(position, request.Level);
+
+        await _context.SaveChangesAsync(cancellationToken);
+
+        return new PositionDto(position.Id, position.DepartmentId, position.Title, position.Code, position.Level);
+    }
+}
+
+// Delete Position Command
+public record DeletePositionCommand(Guid Id) : IRequest;
+
+public class DeletePositionCommandHandler : IRequestHandler<DeletePositionCommand>
+{
+    private readonly IApplicationDbContext _context;
+
+    public DeletePositionCommandHandler(IApplicationDbContext context)
+    {
+        _context = context;
+    }
+
+    public async Task Handle(DeletePositionCommand request, CancellationToken cancellationToken)
+    {
+        var position = await _context.Positions.FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken);
+        if (position == null) throw new NotFoundException(nameof(Position), request.Id);
+
+        _context.Positions.Remove(position);
+        await _context.SaveChangesAsync(cancellationToken);
+    }
+}

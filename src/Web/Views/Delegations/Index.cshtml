@@ -3,204 +3,221 @@
 @using FlowDesk.Application.Features.Delegations
 
 @{
+    ViewData["Title"] = "Approval Delegations";
     var includeInactive = (bool)(ViewData["IncludeInactive"] ?? false);
     var allDelegations = ViewBag.AllDelegations as PaginatedList<DelegationDto>;
     var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-200">
     <div>
-        <h3 class="fw-bold mb-1"><i class="bi bi-person-gear text-primary me-2"></i> Approval Delegations</h3>
-        <p class="text-muted mb-0">Delegate your approval authority during leave or out-of-office periods.</p>
+        <h1 class="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+            <i class="bi bi-person-gear text-emerald-600"></i> Approval Delegations
+        </h1>
+        <p class="text-sm text-slate-500 mt-1">Delegate your approval authority during leave or out-of-office periods.</p>
     </div>
-    <div class="d-flex gap-2">
-        <a asp-action="Index" asp-route-includeInactive="@(!includeInactive)" class="btn btn-outline-secondary">
-            <i class="bi bi-filter me-1"></i> @(includeInactive ? "Show Active Only" : "Include Past & Cancelled")
+    <div class="flex items-center gap-2">
+        <a asp-action="Index" asp-route-includeInactive="@(!includeInactive)" class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors shadow-xs">
+            <i class="bi bi-filter"></i> @(includeInactive ? "Show Active Only" : "Include Past & Cancelled")
         </a>
-        <a asp-action="Create" class="btn btn-primary">
-            <i class="bi bi-plus-lg me-1"></i> New Delegation
+        <a asp-action="Create" class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-md shadow-emerald-600/20 transition-all">
+            <i class="bi bi-plus-lg"></i> New Delegation
         </a>
     </div>
 </div>
 
-<ul class="nav nav-tabs mb-4" id="delegationTabs" role="tablist">
-    <li class="nav-item" role="presentation">
-        <button class="nav-link active fw-semibold" id="my-delegations-tab" data-bs-toggle="tab" data-bs-target="#my-delegations" type="button" role="tab">
-            <i class="bi bi-person-badge me-1"></i> My Delegations (@Model.Count)
-        </button>
-    </li>
+<div class="flex border-b border-slate-200 mb-6">
+    <button onclick="switchTab('my-delegations', 'admin-delegations')" class="tab-btn px-4 py-2.5 text-sm font-semibold border-b-2 border-emerald-600 text-emerald-700 transition-colors" id="tab-my-delegations">
+        <i class="bi bi-person-badge me-1"></i> My Delegations (@Model.Count)
+    </button>
     @if (allDelegations != null)
     {
-        <li class="nav-item" role="presentation">
-            <button class="nav-link fw-semibold" id="admin-delegations-tab" data-bs-toggle="tab" data-bs-target="#admin-delegations" type="button" role="tab">
-                <i class="bi bi-shield-check me-1"></i> Admin View: All Delegations (@allDelegations.TotalCount)
-            </button>
-        </li>
+        <button onclick="switchTab('admin-delegations', 'my-delegations')" class="tab-btn px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-700 transition-colors" id="tab-admin-delegations">
+            <i class="bi bi-shield-check me-1"></i> Admin View: All Delegations (@allDelegations.TotalCount)
+        </button>
     }
-</ul>
+</div>
 
-<div class="tab-content" id="delegationTabsContent">
-    <!-- Tab 1: My Delegations -->
-    <div class="tab-pane fade show active" id="my-delegations" role="tabpanel">
-        @if (!Model.Any())
-        {
-            <div class="card card-custom p-5 text-center">
-                <i class="bi bi-person-x text-muted display-4 mb-3"></i>
-                <h5>No delegations found</h5>
-                <p class="text-muted">You have no active or scheduled approval delegations.</p>
-                <div>
-                    <a asp-action="Create" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg me-1"></i> Create Delegation</a>
-                </div>
+<!-- Tab 1: My Delegations -->
+<div id="my-delegations" class="tab-content-block">
+    @if (!Model.Any())
+    {
+        <div class="bg-white border border-slate-200 rounded-xl p-12 text-center shadow-sm">
+            <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 inline-flex items-center justify-center text-xl mb-3 mx-auto border border-slate-200">
+                <i class="bi bi-person-x"></i>
             </div>
-        }
-        else
-        {
-            <div class="card card-custom">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Role / Context</th>
-                                <th>Delegator</th>
-                                <th>Delegatee</th>
-                                <th>Scope</th>
-                                <th>Start Date (UTC)</th>
-                                <th>End Date (UTC)</th>
-                                <th>Status</th>
-                                <th>Reason</th>
-                                <th class="text-end">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var d in Model)
-                            {
-                                bool isMyOutbound = d.DelegatorUserId.ToString() == currentUserId;
+            <h3 class="text-sm font-bold text-slate-900 mb-1">No Delegations Found</h3>
+            <p class="text-xs text-slate-500 mb-4">You have no active or scheduled approval delegations.</p>
+            <div>
+                <a asp-action="Create" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors"><i class="bi bi-plus-lg"></i> Create Delegation</a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden mb-6">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                            <th class="px-5 py-3.5">Role / Context</th>
+                            <th class="px-5 py-3.5">Delegator</th>
+                            <th class="px-5 py-3.5">Delegatee</th>
+                            <th class="px-5 py-3.5">Scope</th>
+                            <th class="px-5 py-3.5">Start Date</th>
+                            <th class="px-5 py-3.5">End Date</th>
+                            <th class="px-5 py-3.5">Status</th>
+                            <th class="px-5 py-3.5">Reason</th>
+                            <th class="px-5 py-3.5 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 text-xs">
+                        @foreach (var d in Model)
+                        {
+                            bool isMyOutbound = d.DelegatorUserId.ToString() == currentUserId;
 
-                                <tr>
-                                    <td>
-                                        @if (isMyOutbound)
-                                        {
-                                            <span class="badge bg-primary"><i class="bi bi-arrow-up-right me-1"></i> Delegated By Me</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge bg-info text-dark"><i class="bi bi-arrow-down-left me-1"></i> Delegated To Me</span>
-                                        }
-                                    </td>
-                                    <td class="fw-semibold">@d.DelegatorName</td>
-                                    <td class="fw-semibold">@d.DelegateeName</td>
-                                    <td>
-                                        @if (d.RequestTypeId.HasValue)
-                                        {
-                                            <span class="badge bg-light text-dark border">@d.RequestTypeName</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge bg-dark">All Request Types</span>
-                                        }
-                                    </td>
-                                    <td>@d.StartDateUtc.ToString("yyyy-MM-dd HH:mm")</td>
-                                    <td>@d.EndDateUtc.ToString("yyyy-MM-dd HH:mm")</td>
-                                    <td>
-                                        @if (d.IsActive)
-                                        {
-                                            <span class="badge bg-success">Active</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge bg-secondary">Expired / Cancelled</span>
-                                        }
-                                    </td>
-                                    <td class="small text-muted" style="max-width: 200px;">@d.Reason</td>
-                                    <td class="text-end">
+                            <tr class="hover:bg-slate-50/80 transition-colors">
+                                <td class="px-5 py-4">
+                                    @if (isMyOutbound)
+                                    {
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200"><i class="bi bi-arrow-up-right"></i> Delegated By Me</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-sky-50 text-sky-700 border border-sky-200"><i class="bi bi-arrow-down-left"></i> Delegated To Me</span>
+                                    }
+                                </td>
+                                <td class="px-5 py-4 font-semibold text-slate-900">@d.DelegatorName</td>
+                                <td class="px-5 py-4 font-semibold text-slate-900">@d.DelegateeName</td>
+                                <td class="px-5 py-4">
+                                    @if (d.RequestTypeId.HasValue)
+                                    {
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">@d.RequestTypeName</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold bg-slate-900 text-white">All Request Types</span>
+                                    }
+                                </td>
+                                <td class="px-5 py-4 text-slate-500">@d.StartDateUtc.ToString("yyyy-MM-dd HH:mm")</td>
+                                <td class="px-5 py-4 text-slate-500">@d.EndDateUtc.ToString("yyyy-MM-dd HH:mm")</td>
+                                <td class="px-5 py-4">
+                                    @if (d.IsActive)
+                                    {
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-600 border border-slate-200">Expired / Cancelled</span>
+                                    }
+                                </td>
+                                <td class="px-5 py-4 text-slate-500 max-w-xs truncate">@d.Reason</td>
+                                <td class="px-5 py-4 text-right">
+                                    <div class="inline-flex items-center gap-1">
                                         @if (d.IsActive && isMyOutbound)
                                         {
-                                            <form asp-action="Cancel" asp-route-id="@d.Id" method="post" class="d-inline">
-                                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to cancel this delegation?');">
-                                                    <i class="bi bi-x-circle me-1"></i> Cancel
-                                                </button>
+                                            <a asp-action="Edit" asp-route-id="@d.Id" class="p-1 text-slate-400 hover:text-slate-700 transition-colors" title="Edit"><i class="bi bi-pencil"></i></a>
+                                            <form asp-action="Cancel" asp-route-id="@d.Id" method="post" class="inline" onsubmit="return confirm('Cancel this delegation?');">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="p-1 text-slate-400 hover:text-rose-600 transition-colors" title="Cancel Delegation"><i class="bi bi-x-circle"></i></button>
                                             </form>
                                         }
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        }
-    </div>
-
-    <!-- Tab 2: Admin View -->
-    @if (allDelegations != null)
-    {
-        <div class="tab-pane fade" id="admin-delegations" role="tabpanel">
-            <div class="card card-custom">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Delegator</th>
-                                <th>Delegatee</th>
-                                <th>Scope</th>
-                                <th>Start Date (UTC)</th>
-                                <th>End Date (UTC)</th>
-                                <th>Status</th>
-                                <th>Reason</th>
-                                <th class="text-end">Actions</th>
+                                    </div>
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var d in allDelegations.Items)
-                            {
-                                <tr>
-                                    <td class="fw-semibold">
-                                        @d.DelegatorName <br />
-                                        <small class="text-muted font-monospace">@d.DelegatorEmail</small>
-                                    </td>
-                                    <td class="fw-semibold">
-                                        @d.DelegateeName <br />
-                                        <small class="text-muted font-monospace">@d.DelegateeEmail</small>
-                                    </td>
-                                    <td>
-                                        @if (d.RequestTypeId.HasValue)
-                                        {
-                                            <span class="badge bg-light text-dark border">@d.RequestTypeName</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge bg-dark">All Request Types</span>
-                                        }
-                                    </td>
-                                    <td>@d.StartDateUtc.ToString("yyyy-MM-dd HH:mm")</td>
-                                    <td>@d.EndDateUtc.ToString("yyyy-MM-dd HH:mm")</td>
-                                    <td>
-                                        @if (d.IsActive)
-                                        {
-                                            <span class="badge bg-success">Active</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge bg-secondary">Inactive</span>
-                                        }
-                                    </td>
-                                    <td class="small text-muted" style="max-width: 200px;">@d.Reason</td>
-                                    <td class="text-end">
-                                        @if (d.IsActive)
-                                        {
-                                            <form asp-action="Cancel" asp-route-id="@d.Id" method="post" class="d-inline">
-                                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Cancel this delegation?');">
-                                                    <i class="bi bi-x-circle me-1"></i> Revoke
-                                                </button>
-                                            </form>
-                                        }
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
+                        }
+                    </tbody>
+                </table>
             </div>
         </div>
     }
 </div>
+
+<!-- Tab 2: Admin View -->
+@if (allDelegations != null)
+{
+    <div id="admin-delegations" class="tab-content-block hidden">
+        <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden mb-6">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                            <th class="px-5 py-3.5">Delegator</th>
+                            <th class="px-5 py-3.5">Delegatee</th>
+                            <th class="px-5 py-3.5">Scope</th>
+                            <th class="px-5 py-3.5">Start Date</th>
+                            <th class="px-5 py-3.5">End Date</th>
+                            <th class="px-5 py-3.5">Status</th>
+                            <th class="px-5 py-3.5">Reason</th>
+                            <th class="px-5 py-3.5 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 text-xs">
+                        @foreach (var d in allDelegations.Items)
+                        {
+                            <tr class="hover:bg-slate-50/80 transition-colors">
+                                <td class="px-5 py-4 font-semibold text-slate-900">
+                                    @d.DelegatorName <br />
+                                    <span class="text-[11px] text-slate-400 font-normal">@d.DelegatorEmail</span>
+                                </td>
+                                <td class="px-5 py-4 font-semibold text-slate-900">
+                                    @d.DelegateeName <br />
+                                    <span class="text-[11px] text-slate-400 font-normal">@d.DelegateeEmail</span>
+                                </td>
+                                <td class="px-5 py-4">
+                                    @if (d.RequestTypeId.HasValue)
+                                    {
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">@d.RequestTypeName</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold bg-slate-900 text-white">All Request Types</span>
+                                    }
+                                </td>
+                                <td class="px-5 py-4 text-slate-500">@d.StartDateUtc.ToString("yyyy-MM-dd HH:mm")</td>
+                                <td class="px-5 py-4 text-slate-500">@d.EndDateUtc.ToString("yyyy-MM-dd HH:mm")</td>
+                                <td class="px-5 py-4">
+                                    @if (d.IsActive)
+                                    {
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-600 border border-slate-200">Inactive</span>
+                                    }
+                                </td>
+                                <td class="px-5 py-4 text-slate-500 max-w-xs truncate">@d.Reason</td>
+                                <td class="px-5 py-4 text-right">
+                                    @if (d.IsActive)
+                                    {
+                                        <form asp-action="Cancel" asp-route-id="@d.Id" method="post" class="inline" onsubmit="return confirm('Revoke this delegation?');">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="p-1 text-slate-400 hover:text-rose-600 transition-colors" title="Revoke"><i class="bi bi-x-circle"></i></button>
+                                        </form>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+
+<script>
+    function switchTab(activeId, hideId) {
+        document.getElementById(activeId).classList.remove('hidden');
+        document.getElementById(hideId).classList.add('hidden');
+        
+        var activeBtn = document.getElementById('tab-' + activeId);
+        var hideBtn = document.getElementById('tab-' + hideId);
+        
+        activeBtn.classList.add('border-emerald-600', 'text-emerald-700');
+        activeBtn.classList.remove('border-transparent', 'text-slate-500');
+        
+        hideBtn.classList.remove('border-emerald-600', 'text-emerald-700');
+        hideBtn.classList.add('border-transparent', 'text-slate-500');
+    }
+</script>
+
